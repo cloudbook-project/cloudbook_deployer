@@ -1,68 +1,85 @@
 import json
 import loader
 
+"""
+	# example of what circle manager must return
 
-cloudbook_agents={
-	"agent_0" : {"127.0.0.1":["du_0"]},
-	"agent_1" : {"127.0.0.1":["du_1"]}
-}
-"""
-cloudbook_dus={
-	"du_0" : ["agent_0"],
-	"du_1" : ["agent_1"]
-}
-"""
-def assign_dus_to_machines(machines, dus):
-	
-	# example of circle.json
-	"""
 	{
-	"127.0.0.1":{"RAM": 100, "CPU": 2},
-	"127.0.0.1":{"RAM": 1000, "CPU": 1}
+	"agent_id_0" : {some stuff about the agent, for future use},
+	"agent_id_1" : {some stuff about the agent, for future use}
 	}
-	"""
+
+
 	#example of du_list.json
-	"""
+
 	{
 	"du_0":{"cost":0, "size":100},
 	"du_1":{"cost":1, "size":130}
 	}
 	"""
 
+#This file must exist in the cloudbook folder, created by the Maker
+dus=loader.load_dictionary("./du_list.json")
+
+#Just an example of what circle manager must return
+cloudbook_agents={
+	"agent_id_0" : {},
+	"agent_id_1" : {}
+}
+
+
+def assign_dus_to_machines(machines, dus):
+
 	# one machine runs only one agent
 	# if we want more agents in the same machine, the machine must be repeated in the circle
-	du_list= dus.keys()
-	machine_list= machines.keys()
-	num_agents=len (machine_list)
+	print(dus)
+	ff= list(dus.keys())
+	num_agents = len(machines)
 
 	result={}
 	for i in range(0,num_agents):
-		agent_name="agent_"+str(i)
-		result[agent_name]={}
-		result[agent_name][machine_list[i]]=[]
-		result[agent_name][machine_list[i]].append(du_list[i])
+		result[machines[i]]={}
+		result[machines[i]]["DU:"]=[]
+		result[machines[i]]["DU:"].append(ff[i])
 	return result
 
 
+#Performs full deployment and assignment of DUs to agents
+def deploy(circle_id):
 
-# asign 
-machines=loader.load_dictionary("./circle.json")
-dus=loader.load_dictionary("./du_list.json")
+	#Calls get_circle_agents(circle_id) in Circle Management Service. It will return the list of agents
+	#I suppose that the circle manager will return a JSON file
+	
+	#url = "address to get the circle"+circle_id
+    #    with urllib.request.urlopen(url) as res:
+    #        data = json.loads(res.read().decode())
+    #        agents_list = list(data.keys())
 
-cloudbook_agents= assign_dus_to_machines(machines, dus)
+	#By now, we will work with the fake "cloudbook_agents" list
+	agents_list = list(cloudbook_agents.keys())
+	
+	res = assign_dus_to_machines(agents_list, dus)
+
+	json_str = json.dumps(res)
+	fo = open("../cloudbook_deployer/prueba.json", 'w')
+	fo.write(json_str)
+	fo.close()
+
+	return True
 
 
+#Performs full deployment and assignment of DUs to agents
+def deploy_local(agents_in_local_circle):
 
+	data = json.load(agents_in_local_circle)
 
-json_str = json.dumps(cloudbook_agents)
-fo = open("../cloudbook_agent/du_files/cloudbook_agents.json", 'w')
-fo.write(json_str)
-fo.close()
+	agents_list = list(data.keys())
+	
+	res = assign_dus_to_machines(agents_list, dus)
 
-"""
-json_str = json.dumps(cloudbook_dus)
-fo = open("../cloudbook_agent/du_files/cloudbook_dus.json", 'w')
-fo.write(json_str)
-fo.close()
-"""
+	json_str = json.dumps(res)
+	fo = open("../cloudbook_deployer/prueba.json", 'w')
+	fo.write(json_str)
+	fo.close()
 
+	return True
