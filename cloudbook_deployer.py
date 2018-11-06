@@ -39,8 +39,7 @@ def assign_dus_to_machines(machines, dus):
 	result={}
 	for i in range(0,num_agents):
 		result[machines[i]]={}
-		result[machines[i]]["DU:"]=[]
-		result[machines[i]]["DU:"].append(ff[i])
+		result[machines[i]]= ff[i]
 	return result
 
 
@@ -83,3 +82,5 @@ def deploy_local(agents_in_local_circle):
 	fo.close()
 
 	return True
+
+deploy(000)
