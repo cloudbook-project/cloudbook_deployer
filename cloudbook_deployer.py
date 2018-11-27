@@ -9,15 +9,22 @@ import loader
 	}
 
 	#example of du_list.json
-	{
-	"du_0":{"cost":0, "size":100},
-	"du_1":{"cost":1, "size":130}
+	dus = {"du_0":{"cost":0, "size":100},
+	"du_1":{"cost":1, "size":130},
+	"du_2":{"cost":2, "size":50},
+	"du_3":{"cost":5, "size":220},
+	"du_4":{"cost":2, "size":110},
+	"du_5":{"cost":3, "size":130},
+	"du_6":{"cost":0, "size":110},
 	}
 
 	#example of agent_with_grant
-	{
-	"agent_id_0": "LOW",
-	"agent_id_1": "HIGH"
+	agents = { "agent_id_0": "LOW",
+	"agent_id_1": "HIGH",
+	"agent_id_2": "MEDIUM",
+	"agent_id_3": "HIGH",
+	"agent_id_4": "LOW",
+	"agent_id_5": "HIGH",
 	}
 
 	#example of what deployer returns:
@@ -34,6 +41,9 @@ def sort_dus(dus):
 		level = dus[du]["cost"] + dus[du]["size"]
 		dus_tmp[du]=level
 	dus_sorted = sorted(dus_tmp.items(), key=lambda kv: kv[1])
+	#Format: [('du_2', 52), ('du_0', 100), ('du_6', 110)]
+	# -> para obtener solo las dus:
+	# dus = [x[0] for x in dus_sorted]
 	return dus_sorted
 
 def sort_agents(agents_with_grant):
@@ -47,6 +57,9 @@ def sort_agents(agents_with_grant):
 		else:
 			agents_tmp[agent]=3
 	agents_sorted = sorted(agents_tmp.items(), key=lambda kv: kv[1])
+	#format: [('agent_id_0', 1), ('agent_id_4', 1)] 
+	# -> para obtener solo los agentes:
+	# agentes = [x[0] for x in agents_sorted]
 	return agents_sorted
 
 def assign_dus_to_machines(circle_agents, agents_with_grant, dus):
@@ -84,6 +97,7 @@ def deploy(circle_id):
 
 	#Calls get_circle_agents(circle_id) in Circle Management Service. It will return the list of agents
 	#I suppose that the circle manager will return a JSON file
+	#Also, we'll need the CIRCLE_INFO.json file to check the FS path
 	
 	#url = "address to get the circle"+circle_id
     #    with urllib.request.urlopen(url) as res:
