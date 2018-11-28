@@ -33,7 +33,7 @@ import loader
 	"du_0": {"agent_id_0", "agent_id_2", "agent_id_5"}
 	}
 """
-
+#This function sorts dus in order of costs and size from smaller cost to higher cost.
 def sort_dus(dus):
 	dus_tmp={}
 	#Count importance of every du to asign
@@ -46,6 +46,9 @@ def sort_dus(dus):
 	# dus = [x[0] for x in dus_sorted]
 	return dus_sorted
 
+
+#This function sorts agents in order of what they grant from smaller grant to higher grant.
+#High grant means that the agent permits to cloudbook to use much of its computing capacity.
 def sort_agents(agents_with_grant):
 	agents_tmp={}
 	#Order the agents by grant
@@ -62,18 +65,18 @@ def sort_agents(agents_with_grant):
 	# agentes = [x[0] for x in agents_sorted]
 	return agents_sorted
 
+#Assigns DUs to agents taking into account the cost each DU and the grant level of every agent.
 def assign_dus_to_machines(circle_agents, agents_with_grant, dus):
-
 	dus_sorted=sort_dus(dus)
 	agents_sorted_by_grant=sort_agents(agents_with_grant)
 
 	if(len(circle_agents) != len(agents_sorted_by_grant)):
 		print("FATAL: circle agents number not coincident")
+		return 0
 	else:
 		#Assign agents to dus: how to check assignment to do it correctly?
 
 		result={}
-
 
 		return result
 
@@ -91,6 +94,19 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus):
 	#	result[agents[i]]= ff[i]
 	#return result
 
+#Calls to Circle Management Service to obtain the circle info. From there, it takes the FS path.
+def get_circle_info(circle_id):
+
+	#Calls get_circle(circle_id) in Circle Management Service. It will return a json containing circle info.
+	#From this JSON, we are getting the FS path (or URL)
+
+	#url = "address to get the circle"+circle_id
+    #	with urllib.request.urlopen(url) as res:
+    #		data = json.loads(res.read().decode())
+    #		FS = data["CIRCLE_INFO"]["DISTRIBUTED_FS"]
+	#		return FS
+	return		
+
 
 #Performs full deployment and assignment of DUs to agents
 def deploy(circle_id):
@@ -103,6 +119,8 @@ def deploy(circle_id):
     #    with urllib.request.urlopen(url) as res:
     #        data = json.loads(res.read().decode())
     #        agents_list = list(data.keys())
+
+	#Remember to load CIRCLE_INFO to get FS path
 
 	#By now, we will work with the fake "cloudbook_agents" list
 	agents_list = list(cloudbook_agents)
@@ -117,8 +135,8 @@ def deploy(circle_id):
 	return True
 
 
-#Performs full deployment and assignment of DUs to agents
-def deploy_local(agents_in_local_circle):
+#Performs full local deployment and assignment of DUs to agents
+def deploy_local(agents_in_local_circle, path):
 
 	data = json.load(agents_in_local_circle)
 
@@ -127,7 +145,7 @@ def deploy_local(agents_in_local_circle):
 	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
 
 	json_str = json.dumps(res)
-	fo = open("../cloudbook_deployer/prueba.json", 'w')
+	fo = open(path+"/cloudbook.json", 'w')
 	fo.write(json_str)
 	fo.close()
 
