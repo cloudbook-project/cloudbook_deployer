@@ -8,7 +8,7 @@ import json, urllib.request
 #Reads file created by deployer, compares to 
 cloudbook_directory = loader.load_dictionary("./prueba.json")
 
-def run(circle_id):
+def run(circle_id, configuration = None):
 
     #Process cloudbook_directory by getting every agent that it includes
 
@@ -25,7 +25,7 @@ def run(circle_id):
         return False
 
 
-def get_online_agents(circle_id):
+def get_online_agents(circle_id, configuration = None):
     agents = list()
     url = "http://localhost:3100/getCircle?circle_id="+circle_id
     with urllib.request.urlopen(url) as res:
@@ -38,7 +38,7 @@ def get_online_agents(circle_id):
         return agents
 
 
-def run_local():
+def run_local(configuration = None):
     
     #just invoke du_0 somehow
     return True
