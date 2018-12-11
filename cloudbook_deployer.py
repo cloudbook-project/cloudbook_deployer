@@ -7,7 +7,7 @@ import loader
 	"agent_id_0",
 	"agent_id_1"
 	}
-"""
+
 #example of du_list.json
 dus = {"du_0":{"cost":0, "size":280},
 "du_1":{"cost":0, "size":260},
@@ -27,7 +27,7 @@ agents = { "agent_id_0": "LOW",
 "agent_id_4": "HIGH",
 "agent_id_5": "MEDIUM",
 }
-"""
+
 	#example of what deployer returns:
 	{
 	"du_0": {"agent_id_0", "agent_id_1", "agent_id_3"},
@@ -87,7 +87,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 			result[du]=[]
 			print(du)
 
-			smallest = float(999999999999)
+			smallest = int(999999999999)
 			chosen_agent = ""
 			for agent in reversed(list(agents_sorted_by_grant.keys())):
 

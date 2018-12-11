@@ -6,13 +6,16 @@ import json, urllib.request
 #If so, calls du_0 to run.
 
 #Reads file created by deployer, compares to 
-cloudbook_directory = loader.load_dictionary("./prueba.json")
+cloudbook_directory = loader.load_cloudbook("./prueba.json")
 
 def run(circle_id, configuration = None):
 
     #Process cloudbook_directory by getting every agent that it includes
-
-    agents_list = list(cloudbook_directory.keys())
+    agents_list = []
+    for du in cloudbook_directory:
+        for agent in cloudbook_directory[du]:
+            if agent not in agents_list:
+                agents_list.append(agent)
 
     ip_publisher_agents = get_online_agents(circle_id)
 
@@ -27,6 +30,8 @@ def run(circle_id, configuration = None):
 
 def get_online_agents(circle_id, configuration = None):
     agents = list()
+    #By now its a fake URL, but it should be:
+    #url = "http://cloudbook-ip-publisher.eu-west-1.elasticbeanstalk.com/getCircle?circle_id="+circle_id"
     url = "http://localhost:3100/getCircle?circle_id="+circle_id
     with urllib.request.urlopen(url) as res:
         data = json.loads(res.read().decode())
