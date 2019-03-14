@@ -1,5 +1,6 @@
 import loader
 import json, urllib.request
+import urllib.request
 
 
 #Checks if al machines are online by connecting to the ip publisher service
@@ -48,4 +49,6 @@ def run_local(configuration = None):
     #just invoke du_0 somehow
     return True
 
-
+if __name__ == "__main__":
+    contents = urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
+    print(contents)
