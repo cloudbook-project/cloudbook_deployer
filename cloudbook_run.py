@@ -51,4 +51,7 @@ def run_local(configuration = None):
 
 if __name__ == "__main__":
     contents = urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
-    print(contents)
+    try:
+        print(eval(contents))
+    except:
+        print(contents)
