@@ -168,7 +168,6 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 
 
 	for i in range(0,total_dus):
-
 		#search most costly DU
 		maxcost=0
 		for du in dus:
@@ -205,9 +204,24 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 		dus[max_du]["cost"]=0
 		dus[max_du]["size"]=0
 
-		result[max_du]=max_agent
+		try:
+			result[max_du].append(max_agent)
+		except:
+			result[max_du]=[]	
+			result[max_du].append(max_agent)
 		#print(chosen_agent, agents_sorted_by_grant[chosen_agent])
-		print "result is", result
+	#TODO: Make this properly, temporal assignation of du_0
+	aux_value = ""
+	print "===Correct du assignation==="
+	for key, value in result.iteritems():
+		if (key == "du_0") and (value != ["agent0"]):
+			aux_value= value
+			result[key] = ["agent0"]
+			
+		if (value == ["agent0"]) and (key != "du_0"):
+			result[key] = aux_value
+
+	print "result is", result
 
 	return result
 
@@ -264,7 +278,7 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
 
 	json_str = json.dumps(res)
-	fo = open(path+"/cloudbook.json", 'w')
+	fo = open("/home/pi/cloudbook_agent-gui/FS/cloudbook_agents.json", 'w')
 	fo.write(json_str)
 	fo.close()
 
@@ -273,10 +287,10 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 
 
 #This file must exist in the cloudbook folder, created by the Maker
-dus=loader.load_dictionary("./du_list.json")
+dus=loader.load_dictionary("/home/pi/cloudbook_agent-gui/FS/du_list.json")
 
 #This file must exit in the cloudbook folder, created by the agents.
-agents_with_grant = loader.load_dictionary("./agents_grant.json")
+agents_with_grant = loader.load_dictionary("/home/pi/cloudbook_agent-gui/FS/agent_grant.json")
 
 #Get agents from Circle, for now, we're using a fake:
 #Just an example of what circle manager must return
