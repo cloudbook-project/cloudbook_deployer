@@ -278,19 +278,27 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
 
 	json_str = json.dumps(res)
-	fo = open("/home/pi/cloudbook_agent-gui/FS/cloudbook_agents.json", 'w')
+	fo = open(output_dir+"/cloudbook_agents.json", 'w')
 	fo.write(json_str)
 	fo.close()
 
 	return True
 
+def load_dictionary(filename):
+	'''This function is used for getting the info coming from de config file'''
+	with open(filename, 'r') as file:
+		aux = json.load(file)
+	return aux
 
+input_dict = load_dictionary("./config_deployer.json")
+input_dir = input_dict["input_folder"]
+output_dir = input_dict["output_folder"]
 
 #This file must exist in the cloudbook folder, created by the Maker
-dus=loader.load_dictionary("/home/pi/cloudbook_agent-gui/FS/du_list.json")
+dus=loader.load_dictionary(input_dir+"/du_list.json")
 
 #This file must exit in the cloudbook folder, created by the agents.
-agents_with_grant = loader.load_dictionary("/home/pi/cloudbook_agent-gui/FS/agent_grant.json")
+agents_with_grant = loader.load_dictionary(input_dir+"/agent_grant.json")
 
 #Get agents from Circle, for now, we're using a fake:
 #Just an example of what circle manager must return
