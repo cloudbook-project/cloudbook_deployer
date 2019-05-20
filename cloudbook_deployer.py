@@ -291,8 +291,8 @@ def load_dictionary(filename):
 	return aux
 
 input_dict = load_dictionary("./config_deployer.json")
-input_dir = input_dict["input_folder"]
-output_dir = input_dict["output_folder"]
+input_dir = input_dict["circle_info"]["DISTRIBUTED_FS"]#["input_folder"]
+output_dir = input_dict["circle_info"]["DISTRIBUTED_FS"]#["output_folder"]
 
 #This file must exist in the cloudbook folder, created by the Maker
 dus=loader.load_dictionary(input_dir+"/du_list.json")
