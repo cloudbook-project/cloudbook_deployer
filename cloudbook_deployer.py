@@ -278,7 +278,7 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
 
 	json_str = json.dumps(res)
-	fo = open(output_dir+"/cloudbook_agents.json", 'w')
+	fo = open(output_dir+"/cloudbook.json", 'w')
 	fo.write(json_str)
 	fo.close()
 
@@ -291,8 +291,21 @@ def load_dictionary(filename):
 	return aux
 
 input_dict = load_dictionary("./config_deployer.json")
-input_dir = input_dict["circle_info"]["DISTRIBUTED_FS"]#["input_folder"]
-output_dir = input_dict["circle_info"]["DISTRIBUTED_FS"]#["output_folder"]
+
+if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
+	if(platform.system()=="Windows"):
+	    path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"
+	    if not os.path.exists(path):
+	        os.makedirs(path)
+	else:
+	    path = "/etc/cloudbook/"
+	    if not os.path.exists(path):
+	        os.makedirs(path)
+else:
+	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
+
+input_dir = path#input_dict["circle_info"]["DISTRIBUTED_FS"]#["input_folder"]
+output_dir = path#input_dict["circle_info"]["DISTRIBUTED_FS"]#["output_folder"]
 
 #This file must exist in the cloudbook folder, created by the Maker
 dus=loader.load_dictionary(input_dir+"/du_list.json")
