@@ -278,8 +278,8 @@ else:
 
 #the input and output path is the same
 #-------------------------------------
-input_dir = path
-output_dir = path
+input_dir = path + os.sep + "distributed"
+output_dir = path + os.sep + "distributed"
 
 #This file must exist in the cloudbook folder, created by the Maker
 #-------------------------------------------------------------------
