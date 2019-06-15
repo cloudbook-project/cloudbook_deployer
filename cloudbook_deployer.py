@@ -38,7 +38,7 @@ agents = { "agent_id_0": "LOW",
 
 
 
-def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration = None):
+def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configuration = None):
 	print ("ENTER in assign_dus_to_machines()...")	
 	#dus_sorted=sort_dus(dus) # this is a list of tuples
 	#agents_sorted_by_grant=sort_agents(agents_with_grant) # this is a list of tuples
@@ -63,11 +63,11 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 
 	for a in agents_with_grant:
 		if agents_with_grant[a]=="HIGH":
-			agents_with_grant[a]=500
+			agents_with_grant[a]=0
 		elif agents_with_grant[a]=="MEDIUM":
-			agents_with_grant[a]=200	
+			agents_with_grant[a]=0	
 		else:
-			agents_with_grant[a]=100	
+			agents_with_grant[a]=0	
 
 	# assign the DU0 to the agent0 
 	#------------------------------
@@ -79,7 +79,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 			break
 
 	for a in agents_with_grant:
-		if a=="AGENT0":
+		if a=="AGENT0":# or a == agent0:
 			#print "agent0 found"
 			try:
 				result[du0].append(a)
@@ -88,9 +88,11 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 				result[du0].append(a)
 			agents_with_grant[a]=int(agents_with_grant[a])-int(dus[du0]["cost"]+dus[du0]["size"])
 			dus[du0]["cost"]=0
+			dus[du0]["size"]=0
 			break
 			#print "choosen DU:",dus[du0]
 			#print "choosen agent:",agents_with_grant[a]
+	print ("el agente 0 es: ",agent0, " y carga la du: ", du)
 
 	for i in range(0,total_dus):
 		#----------------------------------------------
@@ -138,6 +140,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, configuration 
 		#print "le restamos ",dus[max_du]
 		agents_with_grant[max_agent]=int(agents_with_grant[max_agent])-int(dus[max_du]["cost"]+dus[max_du]["size"])
 		dus[max_du]["cost"]=0
+		dus[max_du]["size"]=0
 		
 
 		try:
@@ -217,11 +220,14 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	agents_list = list(data.keys())
 	print ("list of agents:")
 	print (agents_list)
+	agent0 = ""
+	if "AGENT0" not in agents_list:
+		agent0 = agents_list[0]
 
 	#assign DUs to machines
 	#-----------------------
 	# NOTE: both variables "agents_with_grant and dus are global, not need to pass"
-	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
+	res = assign_dus_to_machines(agents_list, agents_with_grant, dus, agent0)
 	
 	#write output file in json format
 	#---------------------------------
