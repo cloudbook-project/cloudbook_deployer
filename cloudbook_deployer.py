@@ -63,11 +63,11 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 
 	for a in agents_with_grant:
 		if agents_with_grant[a]=="HIGH":
-			agents_with_grant[a]=0
+			agents_with_grant[a]=500
 		elif agents_with_grant[a]=="MEDIUM":
-			agents_with_grant[a]=0	
+			agents_with_grant[a]=200	
 		else:
-			agents_with_grant[a]=0	
+			agents_with_grant[a]=100	
 
 	# assign the DU0 to the agent0 
 	#------------------------------
