@@ -79,7 +79,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 			break
 
 	for a in agents_with_grant:
-		if a=="AGENT0":# or a == agent0:
+		if a=="agent_0":# or a == agent0:
 			#print "agent0 found"
 			try:
 				result[du0].append(a)
