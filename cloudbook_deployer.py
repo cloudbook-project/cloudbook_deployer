@@ -79,8 +79,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 			break
 
 	for a in agents_with_grant:
-		#if a=="agent_0":# or a == agent0:
-		if a=="0":
+		if a=="agent_0": # or a == agent0:
 			#print "agent0 found"
 			try:
 				result[du0].append(a)
@@ -221,7 +220,7 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	agents_list = list(data.keys())
 	print ("list of agents:")
 	print (agents_list)
-	agent0 = "0"
+	agent0 = "agent_0"
 	if agent0 not in agents_list:
 		agent0 = agents_list[0]
 
