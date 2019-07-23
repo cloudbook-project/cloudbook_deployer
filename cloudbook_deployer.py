@@ -37,7 +37,7 @@ agents = { "agent_id_0": "LOW",
 
 
 
-
+'''
 def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configuration = None):
 	print ("ENTER in assign_dus_to_machines()...")	
 	#dus_sorted=sort_dus(dus) # this is a list of tuples
@@ -168,6 +168,77 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 	print "result is", result
 
 	return result
+'''
+
+
+'''
+This function assigns the existing DUs to the agents defined in agents_grant.json. The assignment is done in the following manner:
+If there is the same number of DUs and agents:
+	- du_0 is assigned to agent_0
+	- The rest of DUs are sorted from higher to lower cost and assigned to the agents sorted from higher to lower grant
+If there are less DUS than agents:
+	- du_0 is assigned to agent_0
+	- The rest of DUs are sorted from higher to lower cost and assigned to the agents sorted from higher to lower grant, stopping when
+	running out of DUs.
+If there are more DUS than agents:
+	- du_0 is assigned to agent_0
+	- NEEDS TO BE DECIDED WHAT TO DO (NOT IMPLEMENTED YET)
+'''
+def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, configuration = None):
+	print ("ENTER in assign_dus_to_machines()...")
+
+	print("\ndus"); print(dus)
+	print("\nagents_with_grant"); print(agents_with_grant)
+
+	for a in agents_with_grant:
+		if agents_with_grant[a]=="HIGH":
+			agents_with_grant[a]=3
+		elif agents_with_grant[a]=="MEDIUM":
+			agents_with_grant[a]=2
+		else:
+			agents_with_grant[a]=1
+
+	print("\nSorting agents...")
+	sorted_agents_with_grant = sorted(agents_with_grant.items(), key=operator.itemgetter(1))
+	sorted_agents_with_grant = sorted_agents_with_grant[::-1] #reverse the list to have the higher grants first
+	print("\nsorted_agents_with_grant"); print(sorted_agents_with_grant)
+
+	dus_with_cost = {}
+	for du in dus:
+		dus_with_cost[du] = dus[du]['cost']+dus[du]['size'] #the complexity and size of the du code is used as cost
+	#print("\ndus_with_cost"); print(dus_with_cost)
+
+	print("\nSorting DUs...")
+	sorted_dus_with_cost = sorted(dus_with_cost.items(), key=operator.itemgetter(1))
+	sorted_dus_with_cost = sorted_dus_with_cost[::-1] #reverse the list to have the higher costs first
+	print("\nsorted_dus_with_cost"); print(sorted_dus_with_cost)
+
+	result = {}
+	result['du_0'] = ['agent_0']
+
+	if len(dus)<=len(agents_with_grant):
+		if len(dus)==len(agents_with_grant):
+			print("\n\nSame number of agents and DUs. One DU will be assigned to each agent.\n")
+		else:
+			print("\n\nHigher number of agents than DUs. Some agents will not contain any DU.\n")
+		for i in range(0,len(dus)-1):
+			if sorted_dus_with_cost[i][0]=='du_0':
+				sorted_dus_with_cost.pop(i)
+				#print("popped du_0");
+			if sorted_agents_with_grant[i][0]=='agent_0':
+				sorted_agents_with_grant.pop(i)
+				#print("popped agent_0");
+			print("du -> "); print(sorted_dus_with_cost[i])
+			print("agent -> "); print(sorted_agents_with_grant[i])
+			result[sorted_dus_with_cost[i][0]] = [sorted_agents_with_grant[i][0]]
+	else:
+		print("\n\nLower number of agents than DUs. Some agents will contain more than one DU.\n")
+		print("----------     NOT IMPLEMENTED YET     ----------\n")
+		print("WARNING: as it is not implemented, the result will only contain {'du_0': ['agent_0']}")
+
+	print("\n\nRESULT:"); print(result)
+	return result
+
 
 #Calls to Circle Management Service to obtain the circle info. From there, it takes the FS path.
 def get_circle_info(circle_id, configuration = None):
