@@ -187,9 +187,11 @@ If there are more DUS than agents:
 def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, configuration = None):
 	print ("ENTER in assign_dus_to_machines()...")
 
-	print("\ndus"); print(dus)
-	print("\nagents_with_grant"); print(agents_with_grant)
 
+ 
+
+
+	#translate grant cualitative values into numerical values
 	for a in agents_with_grant:
 		if agents_with_grant[a]=="HIGH":
 			agents_with_grant[a]=3
@@ -197,6 +199,10 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, config
 			agents_with_grant[a]=2
 		else:
 			agents_with_grant[a]=1
+
+	print "dictionaries:"
+	print("\ndus"); print(dus)
+	print("\nagents_with_grant"); print(agents_with_grant)
 
 	print("\nSorting agents...")
 	sorted_agents_with_grant = sorted(agents_with_grant.items(), key=operator.itemgetter(1))
@@ -209,35 +215,144 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, config
 	#print("\ndus_with_cost"); print(dus_with_cost)
 
 	print("\nSorting DUs...")
+	#this sort operation transform a dictionary into a list, because a dictionary has not order
 	sorted_dus_with_cost = sorted(dus_with_cost.items(), key=operator.itemgetter(1))
 	sorted_dus_with_cost = sorted_dus_with_cost[::-1] #reverse the list to have the higher costs first
 	print("\nsorted_dus_with_cost"); print(sorted_dus_with_cost)
 
 	result = {}
+	# initialization assigning du_0 to agent_0
 	result['du_0'] = ['agent_0']
+	
+	
+	
+	#set du0 cost to zero
+	for i in range(0,len(sorted_dus_with_cost)):
+		#convert each tuple in a list
+		sorted_dus_with_cost[i]=list(sorted_dus_with_cost[i])
+		if sorted_dus_with_cost[i][0]=='du_0':
+			#print "el coste de la du0 es ",sorted_dus_with_cost[i][1]
+			sorted_dus_with_cost[i][1]=0
+			du_0_cost=dus['du_0']['cost']+dus['du_0']['size']
+			dus['du_0']['cost']=0 # update dictionary cost
+			dus['du_0']['size']=0 # update dictionary size
+			
+			#sorted_dus_with_cost.pop(i) # pop it because is yet inserted
+			#print("popped du_0");
+	
+	#reduce numerical value of grant of agent_0 according with du0 cost
+	for i in range(0,len(sorted_agents_with_grant)):
+		#convert each tuple in a list
+		sorted_agents_with_grant[i]=list(sorted_agents_with_grant[i])
+		if sorted_agents_with_grant[i][0]=='agent_0':
+			sorted_agents_with_grant[i][1]=sorted_agents_with_grant[i][1]-du_0_cost
+			agents_with_grant['agent_0']=agents_with_grant['agent_0']-du_0_cost # update dictionary
+			#sorted_agents_with_grant.pop(i) # pop it because is yet inserted
+			#print("popped agent_0");
 
-	if len(dus)<=len(agents_with_grant):
-		if len(dus)==len(agents_with_grant):
-			print("\n\nSame number of agents and DUs. One DU will be assigned to each agent.\n")
-		else:
-			print("\n\nHigher number of agents than DUs. Some agents will not contain any DU.\n")
-		for i in range(0,len(dus)-1):
-			if sorted_dus_with_cost[i][0]=='du_0':
-				sorted_dus_with_cost.pop(i)
-				#print("popped du_0");
-			if sorted_agents_with_grant[i][0]=='agent_0':
-				sorted_agents_with_grant.pop(i)
-				#print("popped agent_0");
-			print("du -> "); print(sorted_dus_with_cost[i])
-			print("agent -> "); print(sorted_agents_with_grant[i])
-			result[sorted_dus_with_cost[i][0]] = [sorted_agents_with_grant[i][0]]
-	else:
-		print("\n\nLower number of agents than DUs. Some agents will contain more than one DU.\n")
-		print("----------     NOT IMPLEMENTED YET     ----------\n")
-		print("WARNING: as it is not implemented, the result will only contain {'du_0': ['agent_0']}")
+	# assign one du to each agent (agents>dus) or one agent to each du (dus>agents)	
+	print 
+	print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+	print " 1st round --- assigning one du to each agent ---"
+	print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+	agent_index=0
+	for i in range(0,min (len(sorted_dus_with_cost), len(sorted_agents_with_grant))):
+		if sorted_dus_with_cost[i][1]==0 :
+			print " DU" , sorted_dus_with_cost[i][0]," has cost zero"
+			continue;
+		print("du -> ", sorted_dus_with_cost[i])
+		if sorted_agents_with_grant[agent_index][0]=="agent_0":
+			agent_index+=1
+		print("agent -> ",sorted_agents_with_grant[agent_index])
+		result[sorted_dus_with_cost[i][0]] = [sorted_agents_with_grant[agent_index][0]]
+		#reduction of agent grant and update cost of DU to zero 
+		du_name= sorted_dus_with_cost[i][0]
+		du_cost=dus[du_name]['cost']+dus[du_name]['size']
+		sorted_agents_with_grant[i][1]=sorted_agents_with_grant[agent_index][1]-du_cost
+		agent_name =sorted_agents_with_grant[i][0]
+		agents_with_grant[agent_name]=agents_with_grant[agent_name]-du_cost #dict
+		sorted_dus_with_cost[i][1]=0 # set cost to zero
+		dus[sorted_dus_with_cost[i][0]]['cost']=0 # update dictionary
+		dus[sorted_dus_with_cost[i][0]]['size']=0 # update dictionary
+		
+		agent_index+=1
 
-	print("\n\nRESULT:"); print(result)
+	print "1st round result: "
+	print("\n\nRESULT 1st round:"); print(result)
+	print 
+	print "--- dus ---"
+	print sorted_dus_with_cost
+	print "--- agents ---"
+	print sorted_agents_with_grant
+	print
+	print "diccionarios:"
+	print dus
+	print agents_with_grant
+
+
+	print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+	print " 2nd round --- assigning rest of DUs to agents according their power ---"
+	print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+	# now we proceed to assign the rest of DUs to the available agents according with power
+	total_dus=len(dus)
+	for i in range(0,total_dus):
+		#----------------------------------------------
+		# search most costly DU, then search the most powerfull agent
+		# assign the DU to the agent and reduce the power of the agent
+		# delete the DU from du list
+		# repeat the process till none DU is remaining 
+		#-----------------------------------------------
+		maxcost=0
+		for du in dus:
+			if (dus[du]["cost"]+dus[du]["size"]>=maxcost):
+				max_du=du
+				maxcost=dus[du]["cost"]+dus[du]["size"]
+
+		if maxcost==0:
+			break
+		print "the max costly DU is ", max_du
+
+		#search the most powerfull agent
+		max_power=-100000000
+		max_agent="";
+		for a in agents_with_grant:
+			if (int(agents_with_grant[a])>max_power):
+				#print a,agents_with_grant[a]
+				max_agent=a
+				max_power=agents_with_grant[a]
+
+		#print "the most powerfull agent is ", max_agent, agents_with_grant[max_agent]
+		
+
+		if (max_agent==""):
+			print ("  failure searching the most powefull agent")
+			return False
+
+		
+		#if (int(agents_with_grant[max_agent])<int (dus[max_du]["cost"]+dus[max_du]["size"])):
+		#	return False
+		
+
+		# we assign the most costly DU to the most powerfull agent
+		# ----------------------------------------------------------
+		print "choosen DU:",max_du,dus[max_du]
+		du_name=max_du
+		print "choosen agent:",max_agent,agents_with_grant[max_agent]
+		agent_name= max_agent
+		
+		result [du_name]=agent_name
+		agents_with_grant[agent_name]= agents_with_grant[agent_name]- maxcost #update dictionary
+		dus[du_name]['cost']=0 # update dictionary
+		dus[du_name]['size']=0 # update dictionary
+
+	print "diccionarios:"
+	print dus
+	print agents_with_grant
+
+	print("\n\nRESULT 2nd round:"); print(result)
+	
 	return result
+
 
 
 #Calls to Circle Management Service to obtain the circle info. From there, it takes the FS path.
@@ -283,7 +398,7 @@ def deploy(circle_id, configuration = None):
 
 #Performs full local deployment and assignment of DUs to agents
 def deploy_local(agents_in_local_circle, path, configuration = None):
-
+	print ("ENTER in deploy_local()...")
 	#transform str (in json format) into dictionary with pairs agent, grant
 	data = json.loads(agents_in_local_circle)
 
@@ -294,10 +409,11 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	agent0 = "agent_0"
 	if agent0 not in agents_list:
 		agent0 = agents_list[0]
+		print "ERROR!!. there is not agent_0 ", agent0 ,"will be used as agent_0"
 
 	#assign DUs to machines
 	#-----------------------
-	# NOTE: both variables "agents_with_grant and dus are global, not need to pass"
+	# NOTE: both variables "agents_with_grant and dus are global, not need to be passed"
 	res = assign_dus_to_machines(agents_list, agents_with_grant, dus, agent0)
 	
 	#write output file in json format
