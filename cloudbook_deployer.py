@@ -10,7 +10,8 @@ import surveillance_monitor
 import datetime
 from pathlib import Path
 
-
+#from termcolor import colored
+#from colorama import Fore
 """
 	
 #example of du_list.json
@@ -176,7 +177,11 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 	return result
 '''
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+def timestamp():
+	x=datetime.datetime.now()
+	return x.strftime("%b %d %Y %H:%M:%S |")
+
+#######################################################################################################
 '''
 This function assigns the existing DUs to the agents defined in agents_grant.json. The assignment is done in the following manner:
 If there is the same number of DUs and agents:
@@ -362,8 +367,7 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, config
 	
 	return result
 
-
-#%%%%%%%%%%%%%%%%%%%%% THIS FUNCTION IS NOT USED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+####################### THIS FUNCTION IS NOT USED #########################################################################
 #Calls to Circle Management Service to obtain the circle info. From there, it takes the FS path.
 def get_circle_info(circle_id, configuration = None):
 
@@ -377,7 +381,7 @@ def get_circle_info(circle_id, configuration = None):
 	#		return FS
 	return		
 
-#%%%%%%%%%%%%%%%%%%%%% THIS FUNCTION IS NOT USED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+####################### THIS FUNCTION IS NOT USED #########################################################################
 #deploy: Performs full deployment and assignment of DUs to agents
 def deploy(circle_id, configuration = None):
 
@@ -404,7 +408,7 @@ def deploy(circle_id, configuration = None):
 
 	return True
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################################
 #Performs full local deployment and assignment of DUs to agents
 def deploy_local(agents_in_local_circle, path, configuration = None):
 	print ("ENTER in deploy_local()...")
@@ -441,7 +445,8 @@ def load_dictionary(filename):
 		aux = json.load(file)
 	return aux
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+################################################################################################
 # redeploy: this function achieves the deployment process again, triggered by the 
 # surveillance monitor
 def cold_redeploy(input_dir):
@@ -458,9 +463,11 @@ def cold_redeploy(input_dir):
 	agents_in_local_circle=json.dumps(agents_with_grant)
 	deploy_local(agents_in_local_circle, ".", configuration = None)
 	return
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-def hot_redeploy(input_dir):
-	print (" hot redeploy in progress...")
+
+################################################################################################	
+def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_dict, idle_agents):
+	print()
+	print (" ENTER in hot_redeploy() ...")
 	#first make a backup of existing dictionary
 	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
 	p = Path(input_dir+'/HOT_REDEPLOY')
@@ -471,38 +478,94 @@ def hot_redeploy(input_dir):
 	agents_with_grant = loader.load_dictionary(input_dir+"/agents_grant.json")
 	available_agents=sorted (agents_with_grant.items())
 
-	print ("available agents:", available_agents)
+	
 	#load cloudbook
 	old_cloudbook=loader.load_dictionary(input_dir+"/cloudbook.json")
 	new_cloudbook={}
+
+	sorted_new_agents_with_grant = sorted(new_agents_dict.items(), key=operator.itemgetter(1))
+	sorted_new_agents_with_grant = sorted_new_agents_with_grant[::-1]
+	aal=[]
+	for i in range (0,len(available_agents)):
+		aal.append(available_agents[i][0])
+
+	nal=[] # new agents list
+	for i in range (0,len(sorted_new_agents_with_grant)):
+		nal.append(sorted_new_agents_with_grant[i][0])
+
+	#nba=[] # non busy agents
+	#nba= idle_agents
+	#nba=surveillance_monitor.get_non_busy_agents(input_dir) #,aal)
+
+	ia_index=0
+	ia_num=len(idle_agents)
+	#print ("na_num",na_num)
+
+	print ("available agents:", available_agents)
+	print ("new agents", sorted_new_agents_with_grant)
+	print ("idle agents", idle_agents) # new or not new
+	
+	
+	
+
+
 	for du in old_cloudbook:
 		la=[]
-		print ("lista de ", du, "= ", old_cloudbook[du])
+		#print ("lista de ", du, "= ", old_cloudbook[du])
 		for a in old_cloudbook[du]:
-			if a in agents_with_grant: #available_agents:
+			#print ("buscando ", a , " en availables")
+			if a in aal: #available_agents:
 				la.append(a)
-		# si la esta vacia, debemos asociar la du a uno de los nuevos agentes o bien al agente existente
-		#mas poderoso 
-
-		ESTO ESTA PENDIENTE 
-		
+		# si la esta vacia, debemos asociar la du a uno de los nuevos agentes 
+		print ("ia_index=",ia_index, "  ia_num=", ia_num)
+		if la==[] and ia_index<ia_num:
+			la.append(idle_agents[ia_index])
+			ia_index+=1
+			# con este mecanismo siempre se va a asociar la DU huerfana a algun agente idle
+			ia_index=ia_index % (ia_num)
+			print ("du:",du , " se asocia a agente ",ia_index, "-->",idle_agents[ia_index])
+		# si la sigue vacia es porque no hay nuevos agentes disponibles 
+		if (la==[]):
+			print ("la DU , ", du, " se queda sin agente")
 		new_cloudbook[du]=la
 
-	print ("mmmmmmmmmm OLD mmmmmmmmmmmmmmm")
+	print ("mmmmmmmmmm OLD CLOUDBOOK mmmmmmmmmmmmmmm")
 	print (old_cloudbook)
-	print ("mmmmmmmmmmm NEW mmmmmmmmmmmmmm")
+	print ("mmmmmmmmmmm NEW CLOUDBOOKmmmmmmmmmmmmmm")
 	print (new_cloudbook)
 	print ("mmmmmmmmmmmmmmmmmmmmmmmmm")
 
+	#write output file in json format
+	#---------------------------------
+	json_str = json.dumps(new_cloudbook)
+	fo = open(output_dir+"/cloudbook.json", 'w')
+	fo.write(json_str)
+	fo.close()
 
-#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################################
 #main program to execute by command line
 #=======================================
+print (" ")
+print (" ")
 print ("Welcome to cloudbook deployer  (V1.1)")
 print ("=====================================")
+print ("this program creates cloudbook.json which assign DUs to agents")
+print ("this version supports following features:")
+print ("  - static deployment")
+print ("  - surveillance monitoring")
+print ("  - cold re-deployment (distributed program must restart)")
+print ("  - hot re-deployment . This redeployment has certain limits, no disturb running agents and")
+print ("                        therefore does not provides optimal execution but allows")
+print ("                        keep the program running using all available agents")
+print (" ")
 print (" usage :")
-print ("   python deploy.py [-mode local|service] [-s t2]")
-print ("  ")	
+print ("   py cloudbook_deployer.py [-mode local|service] [-s t2] [-hot]")
+print ("  ")
+print ("   where:")
+print ("     -mode: set the mode local or service")
+print ("     -s t2: enables the surveillance and set the monitor interval")
+print ("     -hot : consider the program is running and use current cloudbook file")
+print (" ")
 print (" Prerequisites:")
 print (" 1. default folder must exist:")
 print ("    - windows: $HOMEDRIVE/$HOMEPATH/cloudbook/")
@@ -523,6 +586,9 @@ print ( "")
 mode="local"
 surveillance_enabled=False
 surveillance_interval=0
+hot_start=False
+
+
 # gather invocation parameters
 # -----------------------------
 num_param=len(sys.argv)
@@ -534,6 +600,13 @@ for i in range(1,len(sys.argv)):
 		surveillance_enabled=True
 		surveillance_interval=sys.argv[i+1]
 		i=i+1
+	if sys.argv[i]=="-hot":
+		hot_start=True
+
+if (not surveillance_enabled and hot_start):
+	print ("option -hot only can be used if suveillance is enabled")
+	sys.exit(0)
+
 
 print (" --- deployer is launched ---")
 print ("working mode :",mode)
@@ -561,6 +634,9 @@ else:
 input_dir = path + os.sep + "distributed"
 output_dir = path + os.sep + "distributed"
 
+#clean touch files
+surveillance_monitor.clean_touch_files(input_dir)
+
 #This file must exist in the cloudbook folder, created by the Maker
 #-------------------------------------------------------------------
 dus=loader.load_dictionary(input_dir+"/du_list.json")
@@ -570,7 +646,7 @@ dus=loader.load_dictionary(input_dir+"/du_list.json")
 #-------------------------------------------
 surveillance_monitor.create_file_agents_grant(input_dir)
 #surveillance_monitor.create_file_backup_agents_grant(input_dir)
-surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+#surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 
 #This file must exit in the cloudbook folder, created by the agents
 #-------------------------------------------------------------------
@@ -607,11 +683,16 @@ else:
 print ("Agents in local circle:")
 print (agents_in_local_circle)
 
+
+
+
 #this is the most important function of deployer
 #-----------------------------------------------
-deploy_local(agents_in_local_circle, ".", configuration = None)
-surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
-
+if not hot_start:
+	deploy_local(agents_in_local_circle, ".", configuration = None)
+	# make a backup of initial cloudbook and initial agents_grant
+	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
+	surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 
 
 
@@ -624,41 +705,85 @@ print ()
 if surveillance_enabled:
 	print ("surveillance monitor is enabled with interval:", surveillance_interval, " seconds")
 	print ("-------------------------------------------------------------")
+
+
 while surveillance_enabled:
+
+	
 	#delete posible alarms before sleep
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	if critical_file:
 		os.remove(input_dir+"/CRITICAL")
 
-	#create a backup before sleep
-	surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+	warning_file= os.path.isfile(input_dir+"/WARNING")
+	if warning_file:
+		os.remove(input_dir+"/WARNING")
+
+	
 	
 	#sleep
-	print ("sleeping...", surveillance_interval	)
+	print (timestamp(),"sleeping...", surveillance_interval	)
 	print()
 	time.sleep (float(surveillance_interval))
-	print ("End of sleep. Now ready for surveillance",datetime.datetime.now())
+	print ("============== SURVEILLANCE MONITOR ===============================")
+	print (timestamp(), "End of sleep. Now ready for surveillance")
+
 	
 	#delete REDEPLOY file if exists
 	redeploy_file= os.path.isfile(input_dir+"/COLD_REDEPLOY")
 	if redeploy_file:
 		os.remove(input_dir+"/COLD_REDEPLOY")
+	redeploy_file= os.path.isfile(input_dir+"/HOT_REDEPLOY")
+	if redeploy_file:
+		os.remove(input_dir+"/HOT_REDEPLOY")
+
 
 	#create new updated file agents_grant
 	surveillance_monitor.create_file_agents_grant(input_dir)
+	idle_agents=surveillance_monitor.get_idle_agents(input_dir)
+	if idle_agents != []:
+		print (" detected some new or existing idle agents:", idle_agents)
 
-	# check if there is a CRITICAL alarm
+    
+	# check if there is a CRITICAL alarm. If exists, a cold redeployment must be done
+	# -------------------------------------------------------------------------------
+	# critical must be checked before warning
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	print ("critical alarm:", critical_file)
 	if critical_file:
-		print ("CRITICAL ALARM: proceed with COLD redeployment")
+		print (timestamp(), "Detected CRITICAL ALARM: proceed with COLD redeployment")
 		cold_redeploy(input_dir)
+		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+	
 		continue
 
-	#check if there are changes in number of agents
-	changes = surveillance_monitor.check_agents_change(input_dir)
+	# check if there is a WARNING alarm. If exists, a hot redeployment may be done
+	# -------------------------------------------------------------------------------
+	warning_file= os.path.isfile(input_dir+"/WARNING")
+	print ("warning alarm:", warning_file)
+	if warning_file:
+		print (timestamp(), "Detected WARNING ALARM: proceed with HOT redeployment")
+		na={} # new agents
+		ma={} # modified agents
+		sa={} # stopped agents
+		changes = surveillance_monitor.check_agents_changes(input_dir,na,ma,sa)
+		hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+	
+		continue
+
+	#check if there are changes in agents. If there are new agents, a hot redeployment may be done
+	# -------------------------------------------------------------------------------
+	na={} # new agents
+	ma={} # modified agents
+	sa={} # stopped agents
+	changes = surveillance_monitor.check_agents_changes(input_dir,na,ma,sa)
+
+	
 	if changes!=0:
-		print ("CHANGES ON AGENTS: proceed with HOT redeployment")
-		hot_redeploy(input_dir)
+		print (timestamp(), "Detected CHANGES ON AGENTS: proceed with HOT redeployment")
+		hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+	
 		continue
 
