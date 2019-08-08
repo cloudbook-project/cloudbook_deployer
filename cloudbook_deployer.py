@@ -462,6 +462,10 @@ def cold_redeploy(input_dir):
 	agents_with_grant = loader.load_dictionary(input_dir+"/agents_grant.json")
 	agents_in_local_circle=json.dumps(agents_with_grant)
 	deploy_local(agents_in_local_circle, ".", configuration = None)
+
+	#touch restart for run again
+	p = Path(input_dir+'/RESTART')
+	p.touch(exist_ok=True)
 	return
 
 ################################################################################################	
