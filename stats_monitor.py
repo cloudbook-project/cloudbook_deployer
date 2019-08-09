@@ -48,4 +48,13 @@ while  True:
 	print ("============== STATS MONITOR ===============================")
 	print (timestamp(), "End of sleep. Now ready for processing stats")
 
+	#read current cumulated stats file ( this is the filematrix) into a dictionary
+	#for each agent stats
+	#   read stats from agents and add their numbers to the dictionary
+	#   delete stats_xx.json
+	# compare old stats with new stats
+	# make a recomendation (REQUEST_REMAKE file)
+
+
+
 
