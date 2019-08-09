@@ -62,7 +62,28 @@ def get_idle_agents(input_dir):
 # this function creates the file agents_grant.json using the files agent_xxx_grant.json created
 # by each agent
 def create_file_agents_grant(input_dir):
+	print("creating file agents_grant...")
+	agents_with_grant = {}
+	agents_files=[]
+	agents_files=os.listdir(input_dir+"/agents_grant")
+	print (agents_files)
+	# enter in each file
+	for file in agents_files:
+		agent= loader.load_dictionary(input_dir+"/agents_grant/"+file)
+		print ("agent=",agent)
+		for a in agent:
+			agents_with_grant[a]=agent[a]
+		os.remove (input_dir+"/agents_grant/"+file)
+	print ("all agents have been read")
+	print (agents_with_grant)
 
+	# PENDIENTE SALVAR EL FICHERO
+	"""
+	json_str = json.dumps(agents_with_grant)
+	fo = open(output_dir+"/agents_grant.json", 'w')
+	fo.write(json_str)
+	fo.close()
+	"""
 	return
 
 #######################################################################################################

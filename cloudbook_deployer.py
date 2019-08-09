@@ -183,23 +183,19 @@ def timestamp():
 
 #######################################################################################################
 '''
-This function assigns the existing DUs to the agents defined in agents_grant.json. The assignment is done in the following manner:
-If there is the same number of DUs and agents:
+This function assigns the existing DUs to the agents defined in agents_grant.json. 
+The assignment is done in the following manner:
+
+	- grant is translated into numerical power value
 	- du_0 is assigned to agent_0
-	- The rest of DUs are sorted from higher to lower cost and assigned to the agents sorted from higher to lower grant
-If there are less DUS than agents:
-	- du_0 is assigned to agent_0
-	- The rest of DUs are sorted from higher to lower cost and assigned to the agents sorted from higher to lower grant, stopping when
-	running out of DUs.
-If there are more DUS than agents:
-	- du_0 is assigned to agent_0
-	- NEEDS TO BE DECIDED WHAT TO DO (NOT IMPLEMENTED YET)
+	- 1st round: DUs are sorted from higher to lower cost and assigned 
+	             to the agents sorted from higher to lower grant
+	             agents power are updated
+	             agent cost is the summation of cost and size
+	- 2nd round: rest of DUs are assigned to agents acording with their remaining power
 '''
-def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0, configuration = None):
+def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 	print ("ENTER in assign_dus_to_machines()...")
-
-
- 
 
 
 	#translate grant cualitative values into numerical values
@@ -399,7 +395,7 @@ def deploy(circle_id, configuration = None):
 	#By now, we will work with the fake "cloudbook_agents" list
 	agents_list = list(cloudbook_agents)
 	
-	res = assign_dus_to_machines(agents_list, agents_with_grant, dus)
+	res = assign_dus_to_agents(agents_with_grant, dus)
 
 	json_str = json.dumps(res)
 	fo = open("../cloudbook_deployer/prueba.json", 'w')
@@ -419,15 +415,17 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 	agents_list = list(data.keys())
 	print ("list of agents:")
 	print (agents_list)
+
+	"""
 	agent0 = "agent_0"
 	if agent0 not in agents_list:
 		agent0 = agents_list[0]
 		print ("ERROR!!. there is not agent_0 ", agent0 ,"will be used as agent_0")
-
+	"""
 	#assign DUs to machines
 	#-----------------------
 	# NOTE: both variables "agents_with_grant and dus are global, not need to be passed"
-	res = assign_dus_to_machines(agents_list, agents_with_grant, dus, agent0)
+	res = assign_dus_to_agents( agents_with_grant, dus)
 	
 	#write output file in json format
 	#---------------------------------
@@ -438,13 +436,12 @@ def deploy_local(agents_in_local_circle, path, configuration = None):
 
 	return True
 
-
+################################################################################################
 # load dictionary:This function is used for getting the info coming from de config file
 def load_dictionary(filename):
 	with open(filename, 'r') as file:
 		aux = json.load(file)
 	return aux
-
 
 ################################################################################################
 # redeploy: this function achieves the deployment process again, triggered by the 
@@ -464,9 +461,10 @@ def cold_redeploy(input_dir):
 	deploy_local(agents_in_local_circle, ".", configuration = None)
 
 	#touch restart for run again
-	p = Path(input_dir+'/RESTART')
+	p = Path(input_dir+'/REQUEST_RESTART')
 	p.touch(exist_ok=True)
 	return
+
 
 ################################################################################################	
 def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_dict, idle_agents):
@@ -474,8 +472,7 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	print (" ENTER in hot_redeploy() ...")
 	#first make a backup of existing dictionary
 	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
-	p = Path(input_dir+'/HOT_REDEPLOY')
-	p.touch(exist_ok=True)
+	
 	global dus
 	dus = loader.load_dictionary(input_dir+"/du_list.json")
 	global agents_with_grant 
@@ -509,10 +506,7 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	print ("new agents", sorted_new_agents_with_grant)
 	print ("idle agents", idle_agents) # new or not new
 	
-	
-	
-
-
+	orphan_dict={}
 	for du in old_cloudbook:
 		la=[]
 		#print ("lista de ", du, "= ", old_cloudbook[du])
@@ -521,23 +515,48 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 			if a in aal: #available_agents:
 				la.append(a)
 		# si la esta vacia, debemos asociar la du a uno de los nuevos agentes 
+		# los agentes estan ordenados de mayor a menor power
 		print ("ia_index=",ia_index, "  ia_num=", ia_num)
-		if la==[] and ia_index<ia_num:
-			la.append(idle_agents[ia_index])
-			ia_index+=1
-			# con este mecanismo siempre se va a asociar la DU huerfana a algun agente idle
-			ia_index=ia_index % (ia_num)
-			print ("du:",du , " se asocia a agente ",ia_index, "-->",idle_agents[ia_index])
-		# si la sigue vacia es porque no hay nuevos agentes disponibles 
-		if (la==[]):
-			print ("la DU , ", du, " se queda sin agente")
-		new_cloudbook[du]=la
+		if la==[] :
+			orphan_dict[du]=dus[du]
 
-	print ("mmmmmmmmmm OLD CLOUDBOOK mmmmmmmmmmmmmmm")
+	print ("orphan dictionary:",orphan_dict)
+
+	dus_with_cost = {}
+	for du in orphan_dict:
+		dus_with_cost[du] = dus[du]['cost']+dus[du]['size'] #the complexity and size of the du code is used as cost
+	#print("\ndus_with_cost"); print(dus_with_cost)
+
+	print("\nSorting orphan DUs...")
+	#this sort operation transform a dictionary into a list, because a dictionary has not order
+	sorted_dus_with_cost = sorted(dus_with_cost.items(), key=operator.itemgetter(1))
+	sorted_dus_with_cost = sorted_dus_with_cost[::-1] #reverse the list to have the higher costs first
+	#print("\nsorted_dus_with_cost"); 
+	print(sorted_dus_with_cost)
+
+	
+	for du in old_cloudbook:
+		if du not in orphan_dict:
+			new_cloudbook[du]=old_cloudbook[du]
+		else:
+			la=[]
+			if ia_index<ia_num:
+				la.append(idle_agents[ia_index])
+				ia_index+=1
+				ia_index=ia_index % (ia_num)
+				#print ("du:",du , " will be at agent ",ia_index, "-->",idle_agents[ia_index])
+				print ("du:",du , " will be at ",idle_agents[ia_index])
+				# if la remains empty is because there are not available idle agents 
+			if (la==[]):
+				print ("the DU , ", du, " remains orphan")
+			new_cloudbook[du]=la
+
+
+	print ("--------- OLD CLOUDBOOK ---------------")
 	print (old_cloudbook)
-	print ("mmmmmmmmmmm NEW CLOUDBOOKmmmmmmmmmmmmmm")
+	print ("--------- NEW CLOUDBOOK ---------------")
 	print (new_cloudbook)
-	print ("mmmmmmmmmmmmmmmmmmmmmmmmm")
+	print ("---------------------------------------")
 
 	#write output file in json format
 	#---------------------------------
@@ -545,6 +564,9 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	fo = open(output_dir+"/cloudbook.json", 'w')
 	fo.write(json_str)
 	fo.close()
+
+	p = Path(input_dir+'/HOT_REDEPLOY')
+	p.touch(exist_ok=True)
 
 ################################################################################################
 #main program to execute by command line
@@ -637,6 +659,10 @@ else:
 #-------------------------------------
 input_dir = path + os.sep + "distributed"
 output_dir = path + os.sep + "distributed"
+
+
+surveillance_monitor.create_file_agents_grant(input_dir)
+#sys.exit()
 
 #clean touch files
 surveillance_monitor.clean_touch_files(input_dir)
