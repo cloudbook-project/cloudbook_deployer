@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 import time
+import platform
 
 from pathlib import Path
 
@@ -41,6 +42,21 @@ if (stats_interval<5):
 	sys.exit(0)
 
 
+input_dict = loader.load_dictionary("./config.json")
+if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
+	if(platform.system()=="Windows"):
+	    path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"
+	    if not os.path.exists(path):
+	        os.makedirs(path)
+	else:
+	    path = "/etc/cloudbook/"
+	    if not os.path.exists(path):
+	        os.makedirs(path)
+else:
+	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
+
+input_dir = path + os.sep + "distributed"
+	
 while  True:
 	print (timestamp(),"sleeping...", stats_interval	)
 	print()
@@ -48,12 +64,23 @@ while  True:
 	print ("============== STATS MONITOR ===============================")
 	print (timestamp(), "End of sleep. Now ready for processing stats")
 
+	#read function mapping file
+	function_map=loader.load_dictionary(input_dir+"/matrix/function_mapping.json")
+	print ("functions mapping:")
+	print (function_map)
+
 	#read current cumulated stats file ( this is the filematrix) into a dictionary
+	
+
 	#for each agent stats
 	#   read stats from agents and add their numbers to the dictionary
 	#   delete stats_xx.json
+	
+
 	# compare old stats with new stats
-	# make a recomendation (REQUEST_REMAKE file)
+	
+
+	# make a recomendation (REQUEST_REMAKE file) based on the comparison achieved
 
 
 
