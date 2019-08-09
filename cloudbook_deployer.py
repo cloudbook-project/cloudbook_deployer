@@ -624,10 +624,15 @@ for i in range(1,len(sys.argv)):
 		i=i+1
 	if sys.argv[i]=="-s":
 		surveillance_enabled=True
-		surveillance_interval=sys.argv[i+1]
+		surveillance_interval=int(sys.argv[i+1])
 		i=i+1
 	if sys.argv[i]=="-hot":
 		hot_start=True
+
+if (surveillance_interval<5):
+	print ("very low interval value")
+	sys.exit(0)
+
 
 if (not surveillance_enabled and hot_start):
 	print ("option -hot only can be used if suveillance is enabled")
