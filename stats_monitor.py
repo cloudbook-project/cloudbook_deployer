@@ -151,7 +151,7 @@ print ("this program analyzes statistics from agens and create consolidated fill
 print ("additionally this program recomends remake if detects high variations of matrix ")
 print ("  ")
 print ("usage:")
-print (" py stats_monitor.py -matrix.json <filematrix.json> -t <seconds>")
+print (" py stats_monitor.py -matrix <filematrix.json> -t <seconds>")
 print (" ")
 
 
