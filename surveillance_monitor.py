@@ -77,7 +77,7 @@ def create_file_agents_grant(input_dir):
 	print ("all agents have been read")
 	print (agents_with_grant)
 
-	# PENDIENTE SALVAR EL FICHERO
+	# PENDIENTE SALVAR EL FICHERO, aunque ya esta programado
 	"""
 	json_str = json.dumps(agents_with_grant)
 	fo = open(output_dir+"/agents_grant.json", 'w')
