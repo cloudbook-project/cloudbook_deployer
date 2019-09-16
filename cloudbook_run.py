@@ -1,7 +1,7 @@
 import loader
 import json, urllib.request
 import urllib.request
-
+import os, platform
 
 #Checks if al machines are online by connecting to the ip publisher service
 #If so, calls du_0 to run.
@@ -49,9 +49,28 @@ def run_local(configuration = None):
     #just invoke du_0 somehow
     return True
 
+
 if __name__ == "__main__":
-    contents = urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
-    try:
-        print(eval(contents))
-    except:
-        print(contents)
+     # Variable for cloudbook path
+     if(platform.system()=="Windows"):
+         path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"
+     else:
+         path = "/etc/cloudbook/"
+
+     # Load agent config file
+     try:
+         local_ip_info_dict =
+loader.load_dictionary(path+"/distributed/local_IP_info.json")
+         agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']
+     except:
+         print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See local_IP_info.json\n")
+         os._exit(1)
+     contents = urllib.request.urlopen("http://" + agent0_ip_and_port +
+"/invoke?invoked_function=du_0.main").read()
+     #contents =
+urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
+     try:
+         print(eval(contents))
+     except:
+         print(contents)
+

@@ -201,11 +201,11 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 	#translate grant cualitative values into numerical values
 	for a in agents_with_grant:
 		if agents_with_grant[a]=="HIGH":
-			agents_with_grant[a]=3
+			agents_with_grant[a]=300
 		elif agents_with_grant[a]=="MEDIUM":
-			agents_with_grant[a]=2
+			agents_with_grant[a]=200
 		else:
-			agents_with_grant[a]=1
+			agents_with_grant[a]=100
 
 	print ("dictionaries:")
 	print("\ndus"); print(dus)
@@ -248,6 +248,9 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 			#print("popped du_0");
 	
 	#reduce numerical value of grant of agent_0 according with du0 cost
+	print ("DU_0 is assigned always to agent_0")
+	print ("  cost of DU_0 is ",du_0_cost)
+	print ("  agent_0 grant is updated")
 	for i in range(0,len(sorted_agents_with_grant)):
 		#convert each tuple in a list
 		sorted_agents_with_grant[i]=list(sorted_agents_with_grant[i])
@@ -256,16 +259,16 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 			agents_with_grant['agent_0']=agents_with_grant['agent_0']-du_0_cost # update dictionary
 			#sorted_agents_with_grant.pop(i) # pop it because is yet inserted
 			#print("popped agent_0");
-
+	print ("agent 0 grant now is :",agents_with_grant['agent_0'])
 	# assign one du to each agent (agents>dus) or one agent to each du (dus>agents)	
-	print 
+	
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	print (" 1st round --- assigning one du to each agent ---")
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	agent_index=0
 	for i in range(0,min (len(sorted_dus_with_cost), len(sorted_agents_with_grant))):
 		if sorted_dus_with_cost[i][1]==0 :
-			print (" DU" , sorted_dus_with_cost[i][0]," has cost zero")
+			print (" DU" , sorted_dus_with_cost[i][0]," has cost zero (yet assigned)")
 			continue;
 		print("du -> ", sorted_dus_with_cost[i])
 		if sorted_agents_with_grant[agent_index][0]=="agent_0":
@@ -276,8 +279,11 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 		du_name= sorted_dus_with_cost[i][0]
 		du_cost=dus[du_name]['cost']+dus[du_name]['size']
 		sorted_agents_with_grant[i][1]=sorted_agents_with_grant[agent_index][1]-du_cost
-		agent_name =sorted_agents_with_grant[i][0]
+		agent_name =sorted_agents_with_grant[agent_index][0]
+		#update power of agent_name
 		agents_with_grant[agent_name]=agents_with_grant[agent_name]-du_cost #dict
+		print ("now agent",agent_name, " power is ",agents_with_grant[agent_name])
+		#set DU cost to zero becuase has been assigned
 		sorted_dus_with_cost[i][1]=0 # set cost to zero
 		dus[sorted_dus_with_cost[i][0]]['cost']=0 # update dictionary
 		dus[sorted_dus_with_cost[i][0]]['size']=0 # update dictionary
@@ -484,9 +490,10 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	old_cloudbook=loader.load_dictionary(input_dir+"/cloudbook.json")
 	new_cloudbook={}
 
-	sorted_new_agents_with_grant = sorted(new_agents_dict.items(), key=operator.itemgetter(1))
+	#sorted_new_agents_with_grant = sorted(new_agents_dict.items(), key=operator.itemgetter(1)["GRANT"])
+	sorted_new_agents_with_grant = sorted(new_agents_dict.items(), key=lambda x:x[1]["GRANT"])
 	sorted_new_agents_with_grant = sorted_new_agents_with_grant[::-1]
-	aal=[]
+	aal=[] #available agents list
 	for i in range (0,len(available_agents)):
 		aal.append(available_agents[i][0])
 
@@ -502,9 +509,9 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	ia_num=len(idle_agents)
 	#print ("na_num",na_num)
 
-	print ("available agents:", available_agents)
-	print ("new agents", sorted_new_agents_with_grant)
-	print ("idle agents", idle_agents) # new or not new
+	print ("-->available agents:", available_agents)
+	print ("-->new agents: ", sorted_new_agents_with_grant)
+	print ("-->idle agents: ", idle_agents) # new or not new
 	
 	orphan_dict={}
 	for du in old_cloudbook:
@@ -548,7 +555,7 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 				print ("du:",du , " will be at ",idle_agents[ia_index])
 				# if la remains empty is because there are not available idle agents 
 			if (la==[]):
-				print ("the DU , ", du, " remains orphan")
+				print ("the DU , ", du, " remains orphan because all available agents are busy")
 			new_cloudbook[du]=la
 
 
@@ -585,10 +592,10 @@ print ("                        therefore does not provides optimal execution bu
 print ("                        keep the program running using all available agents")
 print (" ")
 print (" usage :")
-print ("   py cloudbook_deployer.py [-mode local|service] [-s t2] [-hot]")
+print ("   py cloudbook_deployer.py -project_folder <project_folder> [-s t2] [-hot]")
 print ("  ")
 print ("   where:")
-print ("     -mode: set the mode local or service")
+print ("     -project_folder: name of project folder")
 print ("     -s t2: enables the surveillance and set the monitor interval")
 print ("     -hot : consider the program is running and use current cloudbook file")
 print (" ")
@@ -609,7 +616,8 @@ print ( "")
 
 
 
-mode="local"
+#mode="local"
+project_folder=""
 surveillance_enabled=False
 surveillance_interval=0
 hot_start=False
@@ -629,7 +637,16 @@ for i in range(1,len(sys.argv)):
 	if sys.argv[i]=="-hot":
 		hot_start=True
 
-if (surveillance_interval<5):
+	if sys.argv[i]=="-project_folder":
+		project_folder=	sys.argv[i+1]
+		i=i+1
+
+if (project_folder==""):
+	print ("option -project_folder missing")
+	sys.exit(0)
+
+
+if (surveillance_interval<5 and surveillance_enabled==True):
 	print ("very low interval value")
 	sys.exit(0)
 
@@ -640,27 +657,27 @@ if (not surveillance_enabled and hot_start):
 
 
 print (" --- deployer is launched ---")
-print ("working mode :",mode)
+#print ("working mode :",mode)
 print ("surveillance:", surveillance_enabled)
 if surveillance_enabled:
 	print ("surveillance interval ",surveillance_interval)
 
 # access to default directory or create it, if it does not exist
 #------------------------------------------------------------
-input_dict = load_dictionary("./config.json")
-if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
-	if(platform.system()=="Windows"):
-	    path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"
-	    if not os.path.exists(path):
-	        os.makedirs(path)
-	else:
-	    path = "/etc/cloudbook/"
-	    if not os.path.exists(path):
-	        os.makedirs(path)
+#input_dict = load_dictionary("./config.json")
+#if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
+if(platform.system()=="Windows"):
+	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"+project_folder
+	if not os.path.exists(path):
+		os.makedirs(path)
 else:
-	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
+	path = "/etc/cloudbook/"+project_folder
+	if not os.path.exists(path):
+		os.makedirs(path)
+#else:
+#	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
 
-#the input and output path is the same
+# the input and output path is the same
 #-------------------------------------
 input_dir = path + os.sep + "distributed"
 output_dir = path + os.sep + "distributed"
@@ -679,7 +696,7 @@ dus=loader.load_dictionary(input_dir+"/du_list.json")
 
 #This file must exit in the cloudbook folder
 #-------------------------------------------
-surveillance_monitor.create_file_agents_grant(input_dir)
+##surveillance_monitor.create_file_agents_grant(input_dir)
 #surveillance_monitor.create_file_backup_agents_grant(input_dir)
 #surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 
@@ -706,17 +723,17 @@ if num_param==3 :
 		mode=sys.argv[2]
 """		
 
-if mode=="local":
+#if mode=="local":
 	#all content is loaded as single string into a variable.
-	agents_in_local_circle=json.dumps(agents_with_grant)
-else:
-	print ("Service mode is not supported in this version")
-	sys.exit()
+agents_in_circle=json.dumps(agents_with_grant)
+#else:
+#	print ("Service mode is not supported in this version")
+#	sys.exit()
 
 
 
 print ("Agents in local circle:")
-print (agents_in_local_circle)
+print (agents_in_circle)
 
 
 
@@ -724,7 +741,7 @@ print (agents_in_local_circle)
 #this is the most important function of deployer
 #-----------------------------------------------
 if not hot_start:
-	deploy_local(agents_in_local_circle, ".", configuration = None)
+	deploy_local(agents_in_circle, ".", configuration = None)
 	# make a backup of initial cloudbook and initial agents_grant
 	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
 	surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
