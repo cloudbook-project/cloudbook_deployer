@@ -122,7 +122,7 @@ def get_stats(input_dir):
 				invoker_orig_name=function_inverse_map[invoker]
 				prev_value=matrix_get(invoker_orig_name,invoker_orig_name)
 				#print ("       teniamos:",matrix_get(invoker_orig_name,invoker_orig_name)) #[invoker_orig_name])
-				print (" sumando:",agent_stats[invoked_dict][invoker])
+				print (" adding:",agent_stats[invoked_dict][invoker])
 				adding_value=agent_stats[invoked_dict][invoker]
 				matrix_set(invoker_orig_name,invoker_orig_name,prev_value+adding_value)
 			
@@ -147,20 +147,31 @@ print (" ")
 print (" ")
 print ("Welcome to cloudbook stats monitor  (V1.0)")
 print ("=============================================")
-print ("this program analyzes statistics from agens and create consolidated filled matrix")
+print ("This program analyzes statistics from agens and create consolidated filled matrix")
 print ("additionally this program recomends remake if detects high variations of matrix ")
 print ("  ")
 print ("usage:")
-print (" py stats_monitor.py -matrix <filematrix.json> -t <seconds>")
-print (" ")
+print (" py stats_monitor.py -project_folder <folder> -matrix <filematrix.json> [-t <seconds>]")
+print ("where: ")
+print ("   -project_folder : the name of the folder of your project")
+print ("   -matrix : the matrix to compare new stats")
+print ("   -t : (optional) stats monitoring interval. If not present, default value is 3/2*AGENT_STATS_INTERVAL")
+print ("")
+
 
 
 function_inverse_map={}
 function_map={}
 
 
-stats_interval=0
+stats_interval=0 #initial value
 filematrix="matrix"
+
+# read AGENT_STATS_INTERVAL parameter at config.json
+# --------------------------------------------------
+
+
+
 # gather invocation parameters
 # -----------------------------
 num_param=len(sys.argv)
@@ -173,33 +184,48 @@ for i in range(1,len(sys.argv)):
 	if sys.argv[i]=="-matrix":
 		filematrix=sys.argv[i+1]
 		i=i+1
+
+	if sys.argv[i]=="-project_folder":
+		project_folder=	sys.argv[i+1]
+		i=i+1
 	
-if (stats_interval<5):
-	print ("very low interval value")
+if (project_folder==""):
+	print ("option -project_folder missing")
 	sys.exit(0)
 
 
-input_dict = loader.load_dictionary("./config.json")
-if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
-	if(platform.system()=="Windows"):
-	    path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"
-	    if not os.path.exists(path):
-	        os.makedirs(path)
-	else:
-	    path = "/etc/cloudbook/"
-	    if not os.path.exists(path):
-	        os.makedirs(path)
+#load dictionary config.json to extract AGENT_STATS_INTERVAL
+# ----------------------------------------------------------
+if(platform.system()=="Windows"):
+	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"+project_folder	
 else:
-	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
+	path = "/etc/cloudbook/"+project_folder
+	
 
 input_dir = path + os.sep + "distributed"
+config_dir = path + os.sep + "config"
+config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
+
+agent_stats_interval=config_dict["AGENT_STATS_INTERVAL"]
+print("  value of AGENT_STATS_INTERVAL at config.json is:",str(agent_stats_interval)," seconds")
+# default value of stats interval is 3/2 * agent_stats_interval
+if (stats_interval==0):
+	stats_interval=(3*agent_stats_interval)/2
+
+# check final value of stats_interval
+if (stats_interval<agent_stats_interval):
+	print ("very low interval value (lower than AGENT_STATS_INTERVAL parameter at config.json")
+	sys.exit(0)
+
+if (stats_interval<5):
+	print ("very low interval value")
+	sys.exit(0)
 
 # read matrix input into a dictionary 
 # this is the current cumulated stats file ( this is the filematrix) 
 print (" Reading matrix: ", filematrix," ...")
 matrix={}
 matrix=loader.load_dictionary(input_dir+"/matrix/"+filematrix)
-#old_matrix=matrix.copy()
 old_matrix=loader.load_dictionary(input_dir+"/matrix/"+filematrix)
 
 print (matrix)
@@ -216,7 +242,7 @@ sys.exit(0)
 
 # ----------------- monitoring process --------------------------------	
 while  True:
-	print (timestamp(),"sleeping...", stats_interval	)
+	print (timestamp(),"sleeping...", stats_interval, " seconds")
 	print()
 	time.sleep (float(stats_interval))
 	print ("============== STATS MONITOR ===============================")

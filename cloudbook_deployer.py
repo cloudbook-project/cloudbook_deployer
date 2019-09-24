@@ -656,7 +656,7 @@ if (not surveillance_enabled and hot_start):
 	sys.exit(0)
 
 
-print (" --- deployer is launched ---")
+print (" --- Deployer is launched ---")
 #print ("working mode :",mode)
 print ("surveillance:", surveillance_enabled)
 if surveillance_enabled:
@@ -664,8 +664,6 @@ if surveillance_enabled:
 
 # access to default directory or create it, if it does not exist
 #------------------------------------------------------------
-#input_dict = load_dictionary("./config.json")
-#if input_dict["circle_info"]["DISTRIBUTED_FS"] == "":
 if(platform.system()=="Windows"):
 	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"+project_folder
 	if not os.path.exists(path):
@@ -674,8 +672,6 @@ else:
 	path = "/etc/cloudbook/"+project_folder
 	if not os.path.exists(path):
 		os.makedirs(path)
-#else:
-#	path = input_dict["circle_info"]["DISTRIBUTED_FS"] 
 
 # the input and output path is the same
 #-------------------------------------
@@ -732,7 +728,7 @@ agents_in_circle=json.dumps(agents_with_grant)
 
 
 
-print ("Agents in local circle:")
+print ("Agents in circle:")
 print (agents_in_circle)
 
 
