@@ -53,19 +53,24 @@ def run_local(configuration = None):
 if __name__ == "__main__":
 	# Variable for cloudbook path
 	if(platform.system()=="Windows"):
-		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"
+		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+"nbody"
+		print("path", path)
 	else:
 		path = "/etc/cloudbook/"
 	#Load agent config file
+	agent0_ip_and_port = ""
 	try:
-		local_ip_info_dict = loader.load_dictionary(path+"/distributed/local_IP_info.json")
-		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']
+		print(path+os.sep+"distributed"+os.sep+"agents_grant.json")
+		local_ip_info_dict = loader.load_dictionary(path+os.sep+"distributed"+os.sep+"agents_grant.json")
+		print(local_ip_info_dict['agent_0']['PORT'])
+		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']+":"+str(local_ip_info_dict['agent_0']['PORT'])
+		print(agent0_ip_and_port)
 	except:
 		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See local_IP_info.json\n")
 		os._exit(1)
 	contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
 	#contents =
-	urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
+	#urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
 	try:
 		print(eval(contents))
 	except:
