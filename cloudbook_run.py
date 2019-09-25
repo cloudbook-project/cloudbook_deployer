@@ -51,18 +51,28 @@ def run_local(configuration = None):
 
 
 if __name__ == "__main__":
+
+	project_folder = ""
+	num_param=len(sys.argv)
+	for i in range(1,len(sys.argv)):
+		if sys.argv[i]=="-project_folder":
+			project_folder=	sys.argv[i+1]
+			i=i+1
+	#-----------------------------
+	if (project_folder==""):
+		print ("option -project_folder missing")
+		sys.exit(0)
 	# Variable for cloudbook path
 	if(platform.system()=="Windows"):
-		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+"nbody"
+		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder
 		print("path", path)
 	else:
-		path = "/etc/cloudbook/"
+		path = "/etc/cloudbook/"+project_folder
 	#Load agent config file
 	agent0_ip_and_port = ""
 	try:
 		print(path+os.sep+"distributed"+os.sep+"agents_grant.json")
 		local_ip_info_dict = loader.load_dictionary(path+os.sep+"distributed"+os.sep+"agents_grant.json")
-		print(local_ip_info_dict['agent_0']['PORT'])
 		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']+":"+str(local_ip_info_dict['agent_0']['PORT'])
 		print(agent0_ip_and_port)
 	except:
