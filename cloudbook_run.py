@@ -2,6 +2,7 @@ import loader
 import json, urllib.request
 import urllib.request
 import os, platform
+import sys
 
 #Checks if al machines are online by connecting to the ip publisher service
 #If so, calls du_0 to run.
