@@ -203,7 +203,7 @@ else:
 	
 
 input_dir = path + os.sep + "distributed"
-config_dir = path + os.sep + "config"
+config_dir = path + os.sep + "distributed"
 config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
 
 agent_stats_interval=config_dict["AGENT_STATS_INTERVAL"]
