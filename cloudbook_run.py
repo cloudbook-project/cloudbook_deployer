@@ -2,6 +2,7 @@ import loader
 import json, urllib.request
 import urllib.request
 import os, platform
+import sys
 
 #Checks if al machines are online by connecting to the ip publisher service
 #If so, calls du_0 to run.
@@ -51,21 +52,36 @@ def run_local(configuration = None):
 
 
 if __name__ == "__main__":
+
+	project_folder = ""
+	num_param=len(sys.argv)
+	for i in range(1,len(sys.argv)):
+		if sys.argv[i]=="-project_folder":
+			project_folder=	sys.argv[i+1]
+			i=i+1
+	#-----------------------------
+	if (project_folder==""):
+		print ("option -project_folder missing")
+		sys.exit(0)
 	# Variable for cloudbook path
 	if(platform.system()=="Windows"):
-		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"
+		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder
+		print("path", path)
 	else:
-		path = "/etc/cloudbook/"
+		path = "/etc/cloudbook/"+project_folder
 	#Load agent config file
+	agent0_ip_and_port = ""
 	try:
-		local_ip_info_dict = loader.load_dictionary(path+"/distributed/local_IP_info.json")
-		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']
+		print(path+os.sep+"distributed"+os.sep+"agents_grant.json")
+		local_ip_info_dict = loader.load_dictionary(path+os.sep+"distributed"+os.sep+"agents_grant.json")
+		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']+":"+str(local_ip_info_dict['agent_0']['PORT'])
+		print(agent0_ip_and_port)
 	except:
 		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See local_IP_info.json\n")
 		os._exit(1)
 	contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
 	#contents =
-	urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
+	#urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
 	try:
 		print(eval(contents))
 	except:
