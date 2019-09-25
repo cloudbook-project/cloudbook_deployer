@@ -665,7 +665,7 @@ if surveillance_enabled:
 # access to default directory or create it, if it does not exist
 #------------------------------------------------------------
 if(platform.system()=="Windows"):
-	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"+project_folder
+	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+ os.sep+"cloudbook"+os.sep+project_folder
 	if not os.path.exists(path):
 		os.makedirs(path)
 else:
@@ -677,7 +677,16 @@ else:
 #-------------------------------------
 input_dir = path + os.sep + "distributed"
 output_dir = path + os.sep + "distributed"
+config_dir = path + os.sep +"config"
 
+config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
+num_desired_agents=config_dict["NUM_DESIRED_AGENTS"]
+num_agents=len( os.listdir(input_dir+"/agents_grant"))
+
+
+if (num_agents<num_desired_agents):
+	print ("error: less available agents (",num_agents,") than NUM_DESIRED_AGENTS  (",num_desired_agents,")")
+	sys.exit(0)
 
 surveillance_monitor.create_file_agents_grant(input_dir)
 #sys.exit()
