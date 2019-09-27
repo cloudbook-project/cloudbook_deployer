@@ -84,6 +84,8 @@ if __name__ == "__main__":
 	#urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
 	try:
 		print(eval(contents))
+		os.remove(path+os.sep+"distributed"+os.sep+"cloudbook.json")
 	except:
 		print(contents)
+		os.remove(path+os.sep+"distributed"+os.sep+"cloudbook.json")
 
