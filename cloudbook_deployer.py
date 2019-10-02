@@ -207,7 +207,12 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 		else:
 			agents_with_grant[a]=100
 
-	print ("dictionaries:")
+	#extract DU_default from du list
+	dus.pop('du_default')
+
+
+	print ("Dictionaries:")
+	print ("-------------")
 	print("\ndus"); print(dus)
 	print("\nagents_with_grant"); print(agents_with_grant)
 
@@ -230,8 +235,7 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 	result = {}
 	# initialization assigning du_0 to agent_0
 	result['du_0'] = ['agent_0']
-	
-	
+		
 	
 	#set du0 cost to zero
 	for i in range(0,len(sorted_dus_with_cost)):
@@ -367,6 +371,19 @@ def assign_dus_to_agents(agents_with_grant, dus, configuration = None):
 
 	print("\n\nRESULT 2nd round:"); print(result)
 	
+	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+	print (" 3rd round --- assigning DU_default to all agents")
+	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+	
+	result['du_default']=[]
+	for i in range(0,len(sorted_agents_with_grant)):
+		#convert each tuple in a list
+		sorted_agents_with_grant[i]=list(sorted_agents_with_grant[i])
+		agent_name= sorted_agents_with_grant[i][0]
+		result['du_default'].append(agent_name)
+
+	print("\n\nRESULT 3rd round:"); print(result)
+
 	return result
 
 ####################### THIS FUNCTION IS NOT USED #########################################################################
