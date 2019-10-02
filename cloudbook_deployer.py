@@ -522,8 +522,8 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	#nba= idle_agents
 	#nba=surveillance_monitor.get_non_busy_agents(input_dir) #,aal)
 
-	ia_index=0
-	ia_num=len(idle_agents)
+	ia_index=0 # idle agent index
+	ia_num=len(idle_agents) #idle agents number
 	#print ("na_num",na_num)
 
 	print ("-->available agents:", available_agents)
@@ -532,6 +532,8 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	
 	orphan_dict={}
 	for du in old_cloudbook:
+		if du=="du_default": # du default never is orphan
+			continue
 		la=[]
 		#print ("lista de ", du, "= ", old_cloudbook[du])
 		for a in old_cloudbook[du]:
@@ -560,7 +562,7 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	
 	for du in old_cloudbook:
-		if du not in orphan_dict:
+		if du not in orphan_dict and du!="du_default":
 			new_cloudbook[du]=old_cloudbook[du]
 		else:
 			la=[]
@@ -575,6 +577,10 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 				print ("the DU , ", du, " remains orphan because all available agents are busy")
 			new_cloudbook[du]=la
 
+
+	#assign du_default to all agents
+	#-------------------------------
+	new_cloudbook["du_default"]=aal
 
 	print ("--------- OLD CLOUDBOOK ---------------")
 	print (old_cloudbook)
@@ -816,7 +822,7 @@ while surveillance_enabled:
 	surveillance_monitor.create_file_agents_grant(input_dir)
 	idle_agents=surveillance_monitor.get_idle_agents(input_dir)
 	if idle_agents != []:
-		print (" detected some new or existing idle agents:", idle_agents)
+		print (" detected some new or existing idle agents (only loaded with du_default):", idle_agents)
 
     
 	# check if there is a CRITICAL alarm. If exists, a cold redeployment must be done

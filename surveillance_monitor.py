@@ -34,11 +34,13 @@ def get_idle_agents(input_dir):
 	cloudbook=loader.load_dictionary(input_dir+"/cloudbook.json")
 	#print (cloudbook)
 
-	aal=[]
+	aal=[] # available agents list
 	agents_with_grant = loader.load_dictionary(input_dir+"/agents_grant.json")
 	available_agents=sorted (agents_with_grant.items())
 	for i in range (0,len(available_agents)):
 		aal.append(available_agents[i][0])
+
+
 
 	#print ("available agents:")
 	#print (aal)
@@ -47,6 +49,8 @@ def get_idle_agents(input_dir):
 	for a in aal:
 		found=False
 		for du in cloudbook:
+			if du=="du_default":
+				continue
 			#print (cloudbook[du])
 			for adu in cloudbook[du]:
 				if adu == a :
@@ -57,7 +61,7 @@ def get_idle_agents(input_dir):
 	
 	#print ("NBA:", nba)
 	#sys.exit()
-	return nba
+	return nba # non busy agents
 
 #######################################################################################################
 # this function creates the file agents_grant.json using the files agent_xxx_grant.json created
