@@ -165,7 +165,7 @@ function_map={}
 
 
 stats_interval=0 #initial value
-filematrix="matrix"
+filematrix="matrix.json"
 
 # read AGENT_STATS_INTERVAL parameter at config.json
 # --------------------------------------------------
@@ -197,7 +197,7 @@ if (project_folder==""):
 #load dictionary config.json to extract AGENT_STATS_INTERVAL
 # ----------------------------------------------------------
 if(platform.system()=="Windows"):
-	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+"/cloudbook/"+project_folder	
+	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder	
 else:
 	path = "/etc/cloudbook/"+project_folder
 	
