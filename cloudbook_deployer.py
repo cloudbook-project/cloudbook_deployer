@@ -547,6 +547,13 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 			orphan_dict[du]=dus[du]
 
 	print ("orphan dictionary:",orphan_dict)
+	#now check if any orphen DU is critical
+	critical_dus=loader.load_dictionary(input_dir+"/critical_dus.json")
+	for critical_du in critical_dus["critical_dus"]:
+		for orphan_du in orphan_dict:
+			if orphan_du== critical_du:
+				return False
+
 
 	dus_with_cost = {}
 	for du in orphan_dict:
@@ -597,7 +604,7 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	p = Path(input_dir+'/HOT_REDEPLOY')
 	p.touch(exist_ok=True)
-
+	return True
 ################################################################################################
 #main program to execute by command line
 #=======================================
@@ -615,12 +622,13 @@ print ("                        therefore does not provides optimal execution bu
 print ("                        keep the program running using all available agents")
 print (" ")
 print (" usage :")
-print ("   py cloudbook_deployer.py -project_folder <project_folder> [-s t2] [-hot]")
+print ("   py cloudbook_deployer.py -project_folder <project_folder> [-s t2] [-hot] [-fast_start]")
 print ("  ")
 print ("   where:")
 print ("     -project_folder: name of project folder")
 print ("     -s t2: enables the surveillance and set the monitor interval")
 print ("     -hot : consider the program is running and use current cloudbook file")
+print ("     -fast_start : consider the existing Agent_XX_grant files instead deletion & wait")
 print (" ")
 print (" Prerequisites:")
 print (" 1. default folder must exist:")
@@ -644,7 +652,7 @@ project_folder=""
 surveillance_enabled=False
 surveillance_interval=0
 hot_start=False
-
+fast_start=False
 
 # gather invocation parameters
 # -----------------------------
@@ -663,6 +671,10 @@ for i in range(1,len(sys.argv)):
 	if sys.argv[i]=="-project_folder":
 		project_folder=	sys.argv[i+1]
 		i=i+1
+
+	if sys.argv[i]=="-fast_start":
+		fast_start=True
+
 
 if (project_folder==""):
 	print ("option -project_folder missing")
@@ -704,6 +716,17 @@ config_dir = path + os.sep + "distributed"
 
 config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
 num_desired_agents=config_dict["NUM_DESIRED_AGENTS"]
+
+#wait till agents create their agent_xx_grant
+if (not fast_start):
+	surveillance_monitor.create_file_agents_grant(input_dir)
+	print ("waiting creation of agent_XX_grant files...")
+	print (timestamp(),"sleeping...", surveillance_interval	)
+	print()
+	time.sleep (float(surveillance_interval))
+	
+
+
 num_agents=len( os.listdir(input_dir+"/agents_grant"))
 
 
@@ -816,6 +839,8 @@ while surveillance_enabled:
 	redeploy_file= os.path.isfile(input_dir+"/HOT_REDEPLOY")
 	if redeploy_file:
 		os.remove(input_dir+"/HOT_REDEPLOY")
+	
+
 
 
 	#create new updated file agents_grant
@@ -831,6 +856,10 @@ while surveillance_enabled:
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	print ("critical alarm:", critical_file)
 	if critical_file:
+		# under cold redeployment RUNNING file must be deleted
+		running_file= os.path.isfile(input_dir+"/RUNNING")
+		if running_file:
+			os.remove(input_dir+"/RUNNING")
 		print (timestamp(), "Detected CRITICAL ALARM: proceed with COLD redeployment")
 		cold_redeploy(input_dir)
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
@@ -847,7 +876,9 @@ while surveillance_enabled:
 		ma={} # modified agents
 		sa={} # stopped agents
 		changes = surveillance_monitor.check_agents_changes(input_dir,na,ma,sa)
-		hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		redeploy=hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		if not redeploy :
+			print(" PROBLEM: Hot redeployment imposible because one or more orphan DUs are critical")
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 	
 		continue
@@ -862,7 +893,9 @@ while surveillance_enabled:
 	
 	if changes!=0:
 		print (timestamp(), "Detected CHANGES ON AGENTS: proceed with HOT redeployment")
-		hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		redeploy=hot_redeploy(input_dir,na,ma,sa, idle_agents)
+		if not redeploy :
+			print(" PROBLEM: Hot redeployment imposible because one or more orphan DUs are critical")
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 	
 		continue

@@ -77,10 +77,21 @@ if __name__ == "__main__":
 		agent0_ip_and_port = local_ip_info_dict['agent_0']['IP']+":"+str(local_ip_info_dict['agent_0']['PORT'])
 		print(agent0_ip_and_port)
 	except:
-		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See local_IP_info.json\n")
+		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See agents_grant.json\n")
 		os._exit(1)
-	contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
-	#contents =
+	
+    #creation of RUNNING file
+    p = Path(path+os.sep+"distributed"+os.sep+"RUNNING")
+    p.touch(exist_ok=True)
+
+    contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
+	
+    #deletion of running file
+    running_file= os.path.isfile(path+os.sep+"distributed"+os.sep+"RUNNING")
+    if running_file:
+        os.remove(path+os.sep+"distributed"+os.sep+"RUNNING")
+
+    #contents =
 	#urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
 	try:
 		print(eval(contents))

@@ -24,6 +24,9 @@ def clean_touch_files(input_dir):
 	if redeploy_file:
 		os.remove(input_dir+"/HOT_REDEPLOY")
 
+	running_file= os.path.isfile(input_dir+"/RUNNING")
+	if running_file:
+		os.remove(input_dir+"/RUNNING")
 
 #######################################################################################################
 # this function identifies the idle (= non busy agents) that may be existing agents or new ones
