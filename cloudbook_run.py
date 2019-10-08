@@ -3,6 +3,7 @@ import json, urllib.request
 import urllib.request
 import os, platform
 import sys
+from pathlib import Path
 
 #Checks if al machines are online by connecting to the ip publisher service
 #If so, calls du_0 to run.
@@ -80,16 +81,16 @@ if __name__ == "__main__":
 		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See agents_grant.json\n")
 		os._exit(1)
 	
-    #creation of RUNNING file
-    p = Path(path+os.sep+"distributed"+os.sep+"RUNNING")
-    p.touch(exist_ok=True)
+	#creation of RUNNING file
+	p = Path(path+os.sep+"distributed"+os.sep+"RUNNING")
+	p.touch(exist_ok=True)
 
-    contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
+	contents = urllib.request.urlopen("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main").read()
 	
-    #deletion of running file
-    running_file= os.path.isfile(path+os.sep+"distributed"+os.sep+"RUNNING")
-    if running_file:
-        os.remove(path+os.sep+"distributed"+os.sep+"RUNNING")
+	#deletion of running file
+	running_file= os.path.isfile(path+os.sep+"distributed"+os.sep+"RUNNING")
+	if running_file:
+		os.remove(path+os.sep+"distributed"+os.sep+"RUNNING")
 
     #contents =
 	#urllib.request.urlopen("http://localhost:3000/invoke?invoked_function=du_0.main").read()
