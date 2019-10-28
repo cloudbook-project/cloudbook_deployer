@@ -49,7 +49,7 @@ def get_idle_agents(input_dir, config_dict):
 	for a in aal:
 		#check if it is possible to assign more DUs o agent_0
 		if (a=="agent_0"):
-			if (config_dict["AGENT0_ONLY_DU0"]=="true"):
+			if (config_dict["AGENT0_ONLY_DU0"]==True):
 				continue
 		found=False
 		for du in cloudbook:

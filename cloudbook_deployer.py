@@ -338,7 +338,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 			# check configuration for Agent0 only DU0
 			# ---------------------------------------
 			if (a =="agent_0"):
-				if (config_dict["AGENT0_ONLY_DU0"]=="true"):
+				if (config_dict["AGENT0_ONLY_DU0"]==True):
 					continue
 
 			if (int(agents_with_grant[a])>max_power):
@@ -390,7 +390,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 		# check configuration for Agent0 only DU0
 		# ---------------------------------------
 		if (agent_name=="agent_0"):
-			if (config_dict["AGENT0_ONLY_DU0"]=="true"):
+			if (config_dict["AGENT0_ONLY_DU0"]==True):
 				continue
 		result['du_default'].append(agent_name)
 
