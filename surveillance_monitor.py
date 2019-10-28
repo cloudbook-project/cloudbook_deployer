@@ -31,7 +31,7 @@ def clean_touch_files(input_dir):
 #######################################################################################################
 # this function identifies the idle (= non busy agents) that may be existing agents or new ones
 # these agents have not any DU assotiated and are ready to get DUs
-def get_idle_agents(input_dir):
+def get_idle_agents(input_dir, config_dict):
 	
 	nba=[]
 	cloudbook=loader.load_dictionary(input_dir+"/cloudbook.json")
@@ -44,17 +44,19 @@ def get_idle_agents(input_dir):
 		aal.append(available_agents[i][0])
 
 
-
-	#print ("available agents:")
-	#print (aal)
-	
-	#print ("checking cloudbook")
+	# check all available agents
+	# for each agent explore all dus assigned
 	for a in aal:
+		#check if it is possible to assign more DUs o agent_0
+		if (a=="agent_0"):
+			if (config_dict["AGENT0_ONLY_DU0"]=="true"):
+				continue
 		found=False
 		for du in cloudbook:
 			if du=="du_default":
 				continue
 			#print (cloudbook[du])
+			# check if this agent (a) has this du (du)
 			for adu in cloudbook[du]:
 				if adu == a :
 					found=True
