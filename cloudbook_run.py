@@ -69,7 +69,7 @@ if __name__ == "__main__":
 		path = os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder
 		print("path", path)
 	else:
-		path = "/etc/cloudbook/"+project_folder
+		path = os.environ['HOME'] + os.sep + "cloudbook" + os.sep + project_folder
 	#Load agent config file
 	agent0_ip_and_port = ""
 	try:

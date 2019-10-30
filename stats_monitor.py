@@ -199,7 +199,7 @@ if (project_folder==""):
 if(platform.system()=="Windows"):
 	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder	
 else:
-	path = "/etc/cloudbook/"+project_folder
+	path = os.environ['HOME'] + os.sep + "cloudbook" os.sep + project_folder
 	
 
 input_dir = path + os.sep + "distributed"

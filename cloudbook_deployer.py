@@ -656,7 +656,7 @@ print (" Prerequisites:")
 print (" 1. default folder must exist:")
 print ("    - windows: $HOMEDRIVE/$HOMEPATH/cloudbook/")
 print ("              (for example, c:/users/myuser/cloudbook")
-print ("    - linux: /etc/cloudbook/")
+print ("    - linux: $HOME/cloudbook/")
 print (" 2. input files must exist at default folder:")
 print ("    - config.json : common for all cloudbook components")
 print ("    - du_list.json : created by cloudbook maker component")
@@ -726,7 +726,7 @@ if(platform.system()=="Windows"):
 	if not os.path.exists(path):
 		os.makedirs(path)
 else:
-	path = "/etc/cloudbook/"+project_folder
+	path = os.environ['HOME'] + os.sep + "cloudbook" + os.sep + project_folder
 	if not os.path.exists(path):
 		os.makedirs(path)
 
