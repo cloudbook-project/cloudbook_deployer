@@ -10,23 +10,39 @@ def clean_touch_files(input_dir):
 	#delete posible alarms before sleep
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	if critical_file:
-		os.remove(input_dir+"/CRITICAL")
+		try:
+			os.remove(input_dir+"/CRITICAL")
+		except:
+			pass
 
 	warning_file= os.path.isfile(input_dir+"/WARNING")
 	if warning_file:
-		os.remove(input_dir+"/WARNING")
+		try:
+			os.remove(input_dir+"/WARNING")
+		except:
+			pass
 
 	#delete REDEPLOY file if exists
 	redeploy_file= os.path.isfile(input_dir+"/COLD_REDEPLOY")
 	if redeploy_file:
-		os.remove(input_dir+"/COLD_REDEPLOY")
+		try:
+			os.remove(input_dir+"/COLD_REDEPLOY")
+		except:
+			pass
+
 	redeploy_file= os.path.isfile(input_dir+"/HOT_REDEPLOY")
 	if redeploy_file:
-		os.remove(input_dir+"/HOT_REDEPLOY")
+		try:
+			os.remove(input_dir+"/HOT_REDEPLOY")
+		except:
+			pass
 
 	running_file= os.path.isfile(input_dir+"/RUNNING")
 	if running_file:
-		os.remove(input_dir+"/RUNNING")
+		try:
+			os.remove(input_dir+"/RUNNING")
+		except:
+			pass
 
 #######################################################################################################
 # this function identifies the idle (= non busy agents) that may be existing agents or new ones

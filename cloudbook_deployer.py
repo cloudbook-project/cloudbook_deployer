@@ -493,7 +493,7 @@ def cold_redeploy(input_dir, config_dict):
 	global agents_with_grant 
 	agents_with_grant = loader.load_dictionary(input_dir+"/agents_grant.json")
 	agents_in_local_circle=json.dumps(agents_with_grant)
-	deploy_local(agents_in_local_circle, ".", configuration = None)
+	deploy_local(agents_in_local_circle, ".", config_dict)
 
 	#touch restart for run again
 	p = Path(input_dir+'/REQUEST_RESTART')
@@ -513,6 +513,10 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	global dus
 	dus = loader.load_dictionary(input_dir+"/du_list.json")
+
+	#extract DU_default from du list
+	#dus.pop('du_default')
+
 	global agents_with_grant 
 	agents_with_grant = loader.load_dictionary(input_dir+"/agents_grant.json")
 	# available agents are all alive agents
@@ -570,6 +574,8 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	print ("orphan dictionary:",orphan_dict)
 	#now check if any orphen DU is critical
+	# an non-critical orphan DU may be hot redeployed when no CRITICAL alarm has been raised. however,
+	# a critical orphan du can not be hot redeployed even without CRITICAL alarm
 	critical_dus=loader.load_dictionary(input_dir+"/critical_dus.json")
 	for critical_du in critical_dus["critical_dus"]:
 		for orphan_du in orphan_dict:
@@ -611,6 +617,10 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	#-------------------------------
 	new_cloudbook["du_default"]=aal
 
+	#if "AGENT0_ONLY_DU0":true then agent_0 must not take DU_default
+	if (config_dict["AGENT0_ONLY_DU0"]==True):
+		new_cloudbook["du_default"].remove("agent_0")
+	
 	print ("--------- OLD CLOUDBOOK ---------------")
 	print (old_cloudbook)
 	print ("--------- NEW CLOUDBOOK ---------------")
