@@ -208,7 +208,10 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 			agents_with_grant[a]=100
 
 	#extract DU_default from du list
-	dus.pop('du_default')
+	du_default_present=False
+	if 'du_default' in dus:
+		dus.pop('du_default')
+		du_default_present=True
 
 
 	print ("Dictionaries:")
@@ -382,17 +385,18 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 	print (" 3rd round --- assigning DU_default to all agents")
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	
-	result['du_default']=[]
-	for i in range(0,len(sorted_agents_with_grant)):
-		#convert each tuple in a list
-		sorted_agents_with_grant[i]=list(sorted_agents_with_grant[i])
-		agent_name= sorted_agents_with_grant[i][0]
-		# check configuration for Agent0 only DU0
-		# ---------------------------------------
-		if (agent_name=="agent_0"):
-			if (config_dict["AGENT0_ONLY_DU0"]==True):
-				continue
-		result['du_default'].append(agent_name)
+	if (du_default_present):
+		result['du_default']=[]
+		for i in range(0,len(sorted_agents_with_grant)):
+			#convert each tuple in a list
+			sorted_agents_with_grant[i]=list(sorted_agents_with_grant[i])
+			agent_name= sorted_agents_with_grant[i][0]
+			# check configuration for Agent0 only DU0
+			# ---------------------------------------
+			if (agent_name=="agent_0"):
+				if (config_dict["AGENT0_ONLY_DU0"]==True):
+					continue
+			result['du_default'].append(agent_name)
 
 	print("\n\nRESULT 3rd round:"); print(result)
 
@@ -485,6 +489,14 @@ def cold_redeploy(input_dir, config_dict):
 	print (" cold redeploy in progress...")
 	#first make a backup of existing dictionary
 	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
+
+	#wait for creation of agentxx grant. first deletion
+	print ("waiting creation of agent_XX_grant files...")
+	print (timestamp(),"sleeping...", surveillance_interval	)
+	print()
+	time.sleep (float(surveillance_interval)) # this wait is supposed to be enough. 
+	surveillance_monitor.create_file_agents_grant(input_dir)
+
 	p = Path(input_dir+'/COLD_REDEPLOY')
 	p.touch(exist_ok=True)
 	
@@ -513,6 +525,10 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	global dus
 	dus = loader.load_dictionary(input_dir+"/du_list.json")
+
+	du_default_present=False
+	if 'du_default' in dus:
+		du_default_present=True
 
 	#extract DU_default from du list
 	#dus.pop('du_default')
@@ -615,11 +631,13 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 
 	#assign du_default to all agents
 	#-------------------------------
-	new_cloudbook["du_default"]=aal
+	if du_default_present:
+		new_cloudbook["du_default"]=aal
 
 	#if "AGENT0_ONLY_DU0":true then agent_0 must not take DU_default
 	if (config_dict["AGENT0_ONLY_DU0"]==True):
-		new_cloudbook["du_default"].remove("agent_0")
+		if du_default_present:
+			new_cloudbook["du_default"].remove("agent_0")
 	
 	print ("--------- OLD CLOUDBOOK ---------------")
 	print (old_cloudbook)
@@ -749,6 +767,10 @@ config_dir = path + os.sep + "distributed"
 config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
 num_desired_agents=config_dict["NUM_DESIRED_AGENTS"]
 
+#clean touch files (CRITICAL, WARNING, HOR_REDEPLOY, etc)
+# --------------------------------------------------------
+surveillance_monitor.clean_touch_files(input_dir)
+
 # wait till agents create their agent_xx_grant
 # --------------------------------------------
 if (not fast_start):
@@ -773,9 +795,6 @@ if (num_agents<num_desired_agents):
 surveillance_monitor.create_file_agents_grant(input_dir)
 #sys.exit()
 
-#clean touch files (CRITICAL, WARNING, HOR_REDEPLOY, etc)
-# --------------------------------------------------------
-surveillance_monitor.clean_touch_files(input_dir)
 
 #This file must exist in the cloudbook folder, created by the Maker
 #-------------------------------------------------------------------
@@ -819,11 +838,17 @@ while surveillance_enabled:
 	#delete posible alarms before sleep
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	if critical_file:
-		os.remove(input_dir+"/CRITICAL")
+		try:
+			os.remove(input_dir+"/CRITICAL")
+		except:
+			pass
 
 	warning_file= os.path.isfile(input_dir+"/WARNING")
 	if warning_file:
-		os.remove(input_dir+"/WARNING")
+		try:
+			os.remove(input_dir+"/WARNING")
+		except:
+			pass
 
 	
 	
@@ -838,10 +863,17 @@ while surveillance_enabled:
 	#delete REDEPLOY file if exists
 	redeploy_file= os.path.isfile(input_dir+"/COLD_REDEPLOY")
 	if redeploy_file:
-		os.remove(input_dir+"/COLD_REDEPLOY")
+		try:
+			os.remove(input_dir+"/COLD_REDEPLOY")
+		except:
+			pass
+
 	redeploy_file= os.path.isfile(input_dir+"/HOT_REDEPLOY")
 	if redeploy_file:
-		os.remove(input_dir+"/HOT_REDEPLOY")
+		try:
+			os.remove(input_dir+"/HOT_REDEPLOY")
+		except:
+			pass
 	
 
 
@@ -862,7 +894,10 @@ while surveillance_enabled:
 		# under cold redeployment RUNNING file must be deleted
 		running_file= os.path.isfile(input_dir+"/RUNNING")
 		if running_file:
-			os.remove(input_dir+"/RUNNING")
+			try:
+				os.remove(input_dir+"/RUNNING")
+			except:
+				pass
 		print (timestamp(), "Detected CRITICAL ALARM: proceed with COLD redeployment")
 		cold_redeploy(input_dir,config_dict)
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
