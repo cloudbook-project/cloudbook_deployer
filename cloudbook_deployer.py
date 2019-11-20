@@ -778,7 +778,8 @@ if (not fast_start):
 	print ("waiting creation of agent_XX_grant files...")
 	print (timestamp(),"sleeping...", surveillance_interval	)
 	print()
-	time.sleep (float(surveillance_interval)) # this wait is supposed to be enough. 
+	surveillance_monitor.sleeprint(float(surveillance_interval))
+	#time.sleep (float(surveillance_interval)) # this wait is supposed to be enough. 
 	
 
 # number of available agents is the number of files
@@ -855,7 +856,11 @@ while surveillance_enabled:
 	#sleep
 	print (timestamp(),"sleeping...", surveillance_interval	)
 	print()
-	time.sleep (float(surveillance_interval))
+
+	#time.sleep (float(surveillance_interval))
+	surveillance_monitor.sleeprint(float(surveillance_interval))
+
+
 	print ("============== SURVEILLANCE MONITOR ===============================")
 	print (timestamp(), "End of sleep. Now ready for surveillance")
 

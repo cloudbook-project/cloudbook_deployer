@@ -4,7 +4,8 @@ import loader
 import os
 import sys
 import json
-
+import time
+import datetime
 #######################################################################################################
 def clean_touch_files(input_dir):
 	#delete posible alarms before sleep
@@ -108,9 +109,16 @@ def create_file_agents_grant(input_dir):
 	print("saving file agents_grant...")
 	
 	json_str = json.dumps(agents_with_grant)
-	fo = open(input_dir+"/agents_grant.json", 'w')
-	fo.write(json_str)
-	fo.close()
+	created=False
+	while created==False:
+		try:
+			fo = open(input_dir+"/agents_grant.json", 'w')
+			fo.write(json_str)
+			fo.close()
+			created=True
+			print ("file agents_grant.json created succesfully")
+		except:
+			print(" failure creating agents_grant.json -> re-trying...")
 	
 	return
 
@@ -192,4 +200,14 @@ def compare_dictionaries(dict1, dict2,new_agents_dict={}, modified_agents_dict={
 	#print ("HOT REDEPLOYMENT: stopped agents")
 	return 2
 
+def sleeprint(surveillance_interval):
+	counter=surveillance_interval
+	while counter>=0:
+		time.sleep (1.0)
+		counter =counter-1
+		print(timestamp(),"sleeping...",int (counter),"   ", end='\r', flush=True)
+	print (timestamp(),"----- end of sleep ---")
 
+def timestamp():
+	x=datetime.datetime.now()
+	return x.strftime("%b %d %Y %H:%M:%S |")
