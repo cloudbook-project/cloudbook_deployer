@@ -110,22 +110,23 @@ def get_stats(input_dir):
 	# enter in each file
 	print ("--------------------------------")
 	for file in agents_files:
-		print ("loading file:"+file+" ...")
-		agent_stats= loader.load_dictionary(input_dir+"/stats/"+file)
-		print ("   agent_stats=",agent_stats)
-		for invoked_dict in agent_stats: # cada d es un diccionario con las invocaciones a una funcion
-			invoked_orig_name=function_inverse_map[invoked_dict]
-			print ("     processing  invoked:", invoked_dict, " orig_name:",invoked_orig_name) # printa una funcion
-			
-			for invoker in agent_stats[invoked_dict]: #f1:4, f2:6 , veces que f ha invocado a la invoked
-				print ("       processing invoker",invoker, "orig_name",function_inverse_map[invoker])
-				invoker_orig_name=function_inverse_map[invoker]
-				prev_value=matrix_get(invoker_orig_name,invoker_orig_name)
-				#print ("       teniamos:",matrix_get(invoker_orig_name,invoker_orig_name)) #[invoker_orig_name])
-				print (" adding:",agent_stats[invoked_dict][invoker])
-				adding_value=agent_stats[invoked_dict][invoker]
-				matrix_set(invoker_orig_name,invoker_orig_name,prev_value+adding_value)
-			
+		if file.startswith("stats_agent") and file.endswith(".json"):
+			print ("loading file:"+file+" ...")
+			agent_stats= loader.load_dictionary(input_dir+"/stats/"+file)
+			print ("   agent_stats=",agent_stats)
+			for invoked_dict in agent_stats: # cada d es un diccionario con las invocaciones a una funcion
+				invoked_orig_name=function_inverse_map[invoked_dict]
+				print ("     processing  invoked:", invoked_dict, " orig_name:",invoked_orig_name) # printa una funcion
+				
+				for invoker in agent_stats[invoked_dict]: #f1:4, f2:6 , veces que f ha invocado a la invoked
+					print ("       processing invoker",invoker, "orig_name",function_inverse_map[invoker])
+					invoker_orig_name=function_inverse_map[invoker]
+					prev_value=matrix_get(invoker_orig_name,invoker_orig_name)
+					#print ("       teniamos:",matrix_get(invoker_orig_name,invoker_orig_name)) #[invoker_orig_name])
+					print (" adding:",agent_stats[invoked_dict][invoker])
+					adding_value=agent_stats[invoked_dict][invoker]
+					matrix_set(invoker_orig_name,invoker_orig_name,prev_value+adding_value)
+				
 		#removal of file . STILL NOT ACTIVATED 
 		#os.remove (input_dir+"/stats/"+file)
 	print ("all agents have been read")
@@ -199,7 +200,7 @@ if (project_folder==""):
 if(platform.system()=="Windows"):
 	path= os.environ['HOMEDRIVE'] + os.environ['HOMEPATH']+os.sep+"cloudbook"+os.sep+project_folder	
 else:
-	path = os.environ['HOME'] + os.sep + "cloudbook" os.sep + project_folder
+	path = os.environ['HOME'] + os.sep + "cloudbook" + os.sep + project_folder
 	
 
 input_dir = path + os.sep + "distributed"
