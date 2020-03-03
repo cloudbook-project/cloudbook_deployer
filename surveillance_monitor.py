@@ -96,11 +96,12 @@ def create_file_agents_grant(input_dir):
 	print (agents_files)
 	# enter in each file
 	for file in agents_files:
-		agent= loader.load_dictionary(input_dir+"/agents_grant/"+file)
-		print ("agent= ",agent)
-		for a in agent:
-			agents_with_grant[a]=agent[a]
-		os.remove (input_dir+"/agents_grant/"+file)
+		if file.startswith("agent") and file.endswith(".json"):
+			agent= loader.load_dictionary(input_dir+"/agents_grant/"+file)
+			print ("agent= ",agent)
+			for a in agent:
+				agents_with_grant[a]=agent[a]
+			os.remove (input_dir+"/agents_grant/"+file)
 	print ("all agents have been read. The final output is:")
 	print (agents_with_grant)
 
