@@ -19,7 +19,7 @@ def load_dictionary(filename, configuration = None):
 				success=True
 			except:
 				counter=counter+1
-				close(filename)
+				file.close()
 				success=False
 				time.sleep(0.1) # 100 ms sleeping
 
