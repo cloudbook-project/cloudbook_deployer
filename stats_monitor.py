@@ -96,7 +96,7 @@ def timestamp_file():
 	return now.strftime("%Y%m%d%H%M%S")
 
 ################################################################################################
-def get_stats(input_dir):
+def get_stats(input_dir,delete_stats_files):
 	cumulated_stats={}
 	print ("----")
 	for i in matrix:
@@ -128,7 +128,11 @@ def get_stats(input_dir):
 					matrix_set(invoker_orig_name,invoker_orig_name,prev_value+adding_value)
 				
 		#removal of file . STILL NOT ACTIVATED 
-		#os.remove (input_dir+"/stats/"+file)
+		if (delete_stats_files):
+			try:
+				os.remove (input_dir+"/stats/"+file)
+			except:
+					pass
 	print ("all agents have been read")
 	print (matrix)
 
@@ -157,6 +161,8 @@ print ("where: ")
 print ("   -project_folder : the name of the folder of your project")
 print ("   -matrix : the matrix to compare new stats")
 print ("   -t : (optional) stats monitoring interval. If not present, default value is 3/2*AGENT_STATS_INTERVAL")
+print ("   -no_remove_stats : (optional) only for debug purposes. this flag avoid deletion of agents stats files")
+
 print ("")
 
 
@@ -167,6 +173,8 @@ function_map={}
 
 stats_interval=0 #initial value
 filematrix="matrix.json"
+
+delete_stats_files=True
 
 # read AGENT_STATS_INTERVAL parameter at config.json
 # --------------------------------------------------
@@ -189,6 +197,10 @@ for i in range(1,len(sys.argv)):
 	if sys.argv[i]=="-project_folder":
 		project_folder=	sys.argv[i+1]
 		i=i+1
+
+	if sys.argv[i]=="-no_remove_stats":
+		delete_stats_files=False
+		
 	
 if (project_folder==""):
 	print ("option -project_folder missing")
@@ -265,7 +277,7 @@ while  True:
 	#for each agent stats
 	#   read stats from agents and add their numbers to the matrix
 	#   delete stats_xx.json
-	get_stats(input_dir)
+	get_stats(input_dir,delete_stats_files)
 	
 	print ("--- new matrix ---")
 	print (matrix)
