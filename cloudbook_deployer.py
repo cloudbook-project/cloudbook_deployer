@@ -741,6 +741,8 @@ if (not surveillance_enabled and hot_start):
 	sys.exit(0)
 
 
+
+
 print (" --- Deployer is launched ---")
 #print ("working mode :",mode)
 print ("surveillance:", surveillance_enabled)
@@ -766,6 +768,14 @@ config_dir = path + os.sep + "distributed"
 
 config_dict = loader.load_dictionary(config_dir+ os.sep +"config.json")
 num_desired_agents=config_dict["NUM_DESIRED_AGENTS"]
+
+#set surveillance interval non-faststart and non surveillance mode
+if (surveillance_interval==0):
+	surveillance_interval=2*int (config_dict["AGENT_GRANT_INTERVAL"])
+	print (" the sleep interval is set to 2xagent =",surveillance_interval)
+	
+
+
 
 #clean touch files (CRITICAL, WARNING, HOR_REDEPLOY, etc)
 # --------------------------------------------------------
