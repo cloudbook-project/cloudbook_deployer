@@ -12,17 +12,19 @@ def load_dictionary(filename, configuration = None):
 	counter=0
 	aux=None
 
-	while (success==False and counter <5):
+	while (success==False and counter <10):
 		with open(filename, 'r') as file:
 			try:
 				aux = json.load(file)
 				if (aux!=None):
 					success=True
+				else:
+					time.sleep(0.5)
 			except:
 				counter=counter+1
 				file.close()
 				success=False
-				time.sleep(0.1) # 100 ms sleeping
+				time.sleep(0.5) # 100 ms sleeping
 
 	if (success):		
 		return aux
