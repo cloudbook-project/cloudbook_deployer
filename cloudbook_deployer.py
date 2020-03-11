@@ -794,7 +794,15 @@ if (not fast_start):
 
 # number of available agents is the number of files
 # -------------------------------------------------
-num_agents=len( os.listdir(input_dir+"/agents_grant"))
+files=os.listdir(input_dir+"/agents_grant")
+num_agents=0
+for file in files:
+	if file.startswith("agent") and file.endswith(".json"):
+		num_agents=num_agents+1
+
+#num_agents=len( os.listdir(input_dir+"/agents_grant")
+
+print ("num agents detected:", num_agents)
 
 
 if (num_agents<num_desired_agents):
