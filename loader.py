@@ -16,7 +16,8 @@ def load_dictionary(filename, configuration = None):
 		with open(filename, 'r') as file:
 			try:
 				aux = json.load(file)
-				success=True
+				if (aux!=None):
+					success=True
 			except:
 				counter=counter+1
 				file.close()
