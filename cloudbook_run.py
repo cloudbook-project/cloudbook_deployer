@@ -45,11 +45,11 @@ if __name__ == "__main__":
 	cloudbookjson_path = project_path + os.sep + "distributed" + os.sep + "cloudbook.json"
 
 	# Load agent_0 ip and port
-	agent0_ip_and_port = ""
+	agent0_ip_port = ""
 	try:
 		agents_grant_dict = loader.load_dictionary(agents_grant_path)
-		agent0_ip_and_port = agents_grant_dict['agent_0']['IP']+":"+str(agents_grant_dict['agent_0']['PORT'])
-		print("Detected agent_0 is available at:", agent0_ip_and_port)
+		agent0_ip_port = agents_grant_dict['agent_0']['IP']+":"+str(agents_grant_dict['agent_0']['PORT'])
+		print("Detected agent_0 is available at:", agent0_ip_port)
 	except:
 		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See agents_grant.json\n")
 		os._exit(1)
@@ -57,9 +57,20 @@ if __name__ == "__main__":
 	# Create RUNNING file
 	Path(running_path).touch(exist_ok=True)
 
+	# Create the invocation dictionary (to call du_0.main)
+	invocation_dict = {}
+	invocation_dict["invoked_du"] = "du_0"
+	invocation_dict["invoked_function"] = "main"
+	invocation_dict["invoker_function"] = None
+	invocation_dict["params"] = {}
+	invocation_dict["params"]["args"] = []
+	invocation_dict["params"]["kwargs"] = {}
+
 	# Launch the user program by sending a request to the agent_0, which starts the main() function
-	response = requests.Session().get("http://" + agent0_ip_and_port + "/invoke?invoked_function=du_0.main")
-	print("The program has ended.")
+	url = "http://" + agent0_ip_port + "/invoke"
+	response = requests.Session().post(url, json=invocation_dict)
+
+	print("The program has finished.")
 
 	# Remove RUNNING and cloudbook.json files (user program has ended)
 	if os.path.exists(running_path):
@@ -72,7 +83,7 @@ if __name__ == "__main__":
 		readed_response = response.json()
 	except:
 		print("The program did not return anything.")
-		os.exit(0)
+		os._exit(0)
 	
 	try:
 		print(eval(readed_response))
