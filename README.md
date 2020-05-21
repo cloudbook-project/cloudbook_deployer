@@ -36,4 +36,5 @@ The Cloudbook deployer component runs only in one machine of the project and it 
 
 
 _Note: the order of the options is not relevant in any of the programs._
+
 _Note 2: remember that the scripts must be run with python3, then you should use the full syntax `python3 <command>` in Unix and `py -3 <command>` in Windows._
