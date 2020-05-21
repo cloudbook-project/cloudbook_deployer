@@ -1,11 +1,11 @@
-
 import shutil
 import loader
 import os
-import sys
 import json
 import time
 import datetime
+
+
 #######################################################################################################
 def clean_touch_files(input_dir):
 	#delete posible alarms before sleep
@@ -82,7 +82,6 @@ def get_idle_agents(input_dir, config_dict):
 			nba.append(a)
 	
 	#print ("NBA:", nba)
-	#sys.exit()
 	return nba # non busy agents
 
 #######################################################################################################
@@ -210,6 +209,7 @@ def compare_dictionaries(dict1, dict2,new_agents_dict={}, modified_agents_dict={
 	#print ("HOT REDEPLOYMENT: stopped agents")
 	return 2
 
+#######################################################################################################
 def sleeprint(surveillance_interval):
 	counter=surveillance_interval
 	while counter>=0:
@@ -218,6 +218,7 @@ def sleeprint(surveillance_interval):
 		print(timestamp(),"sleeping...",int (counter),"   ", end='\r', flush=True)
 	print (timestamp(),"----- end of sleep ---")
 
+#######################################################################################################
 def timestamp():
 	x=datetime.datetime.now()
 	return x.strftime("%b %d %Y %H:%M:%S |")

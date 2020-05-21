@@ -1,6 +1,7 @@
 import json, ast
 import time
 
+
 def load_dictionary_old(filename, configuration = None):
 	with open(filename, 'r') as file:
 		aux = json.load(file)

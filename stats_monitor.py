@@ -9,6 +9,7 @@ import platform
 from pathlib import Path
 
 
+##############################################################
 def sum_all_items_matrix(matrix):
 	suma=0
 	len_row=len(matrix[0])
@@ -17,13 +18,12 @@ def sum_all_items_matrix(matrix):
 			suma+=matrix[row][col]
 	return suma
 
+##############################################################
 def compare_matrix(old_matrix,matrix):
 	
 	#first sumation of all values
 	suma_old=sum_all_items_matrix(old_matrix)
 	suma=sum_all_items_matrix(matrix)
-
-
 
 	len_row=len(old_matrix[0])
 	print ("len_row",len_row)
@@ -41,11 +41,9 @@ def compare_matrix(old_matrix,matrix):
 				return True
 	return False
 
-
 ##############################################################
 # frow are invokers
 # fcol are invoked
-
 def matrix_set(frow,fcol, value):
 	#print ("get ",frow,fcol)
 	col_index=0
@@ -65,10 +63,10 @@ def matrix_set(frow,fcol, value):
 		row_index+=1
 	matrix[row_index][col_index]=value
 	return
+
 #############################################################
 # frow are invokers
 # fcol are invoked
-
 def matrix_get(frow,fcol):
 	#print ("get ",frow,fcol)
 	col_index=0
@@ -85,6 +83,7 @@ def matrix_get(frow,fcol):
 			#print ("row found")
 			return matrix[row_index][col_index]
 		row_index+=1
+
 ################################################################################################
 def timestamp():
 	x=datetime.datetime.now()
@@ -110,7 +109,7 @@ def get_stats(input_dir,delete_stats_files):
 	# enter in each file
 	print ("--------------------------------")
 	for file in agents_files:
-		if file.startswith("stats_agent") and file.endswith(".json"):
+		if file.startswith("stats_agent_") and file.endswith(".json"):
 			print ("loading file:"+file+" ...")
 			agent_stats= loader.load_dictionary(input_dir+"/stats/"+file)
 			print ("   agent_stats=",agent_stats)
@@ -145,6 +144,7 @@ def get_stats(input_dir,delete_stats_files):
 	"""
 	return 
 
+
 ################################################################################################
 #main program to execute by command line
 #=======================================
@@ -162,7 +162,6 @@ print ("   -project_folder : the name of the folder of your project")
 print ("   -matrix : the matrix to compare new stats")
 print ("   -t : (optional) stats monitoring interval. If not present, default value is 3/2*AGENT_STATS_INTERVAL")
 print ("   -no_remove_stats : (optional) only for debug purposes. this flag avoid deletion of agents stats files")
-
 print ("")
 
 
@@ -175,10 +174,6 @@ stats_interval=0 #initial value
 filematrix="matrix.json"
 
 delete_stats_files=True
-
-# read AGENT_STATS_INTERVAL parameter at config.json
-# --------------------------------------------------
-
 
 
 # gather invocation parameters

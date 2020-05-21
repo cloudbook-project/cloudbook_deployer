@@ -12,39 +12,25 @@ from pathlib import Path
 
 #from termcolor import colored
 #from colorama import Fore
+
+
 """
-	
 #example of du_list.json
-dus = {"du_0":{"cost":0, "size":280},
-"du_1":{"cost":0, "size":260},
-"du_2":{"cost":0, "size":300},
-"du_3":{"cost":0, "size":310},
-"du_4":{"cost":0, "size":90},
-"du_5":{"cost":0, "size":120},
-"du_6":{"cost":0, "size":50},
-"du_7":{"cost":0, "size":210}
+dus = {
+	"du_0":{"cost":0, "size":280},
+	"du_1":{"cost":0, "size":260},
+	"du_2":{"cost":0, "size":300},
+	"du_3":{"cost":0, "size":310},
+	"du_4":{"cost":0, "size":90},
+	"du_5":{"cost":0, "size":120},
+	"du_6":{"cost":0, "size":50},
+	"du_7":{"cost":0, "size":210}
 }
-
-#example of agent_with_grant
-agents = { "agent_id_0": "LOW",
-"agent_id_1": "LOW",
-"agent_id_2": "HIGH",
-"agent_id_3": "MEDIUM",
-"agent_id_4": "HIGH",
-"agent_id_5": "MEDIUM",
-}
-
-	#example of what deployer returns:
-	{
-	"du_0": {"agent_id_0", "agent_id_1", "agent_id_3"},
-	"du_0": {"agent_id_0", "agent_id_2", "agent_id_5"}
-	}
 """
-
-
 
 
 '''
+#######################################################################################################
 def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configuration = None):
 	print ("ENTER in assign_dus_to_machines()...")	
 	#dus_sorted=sort_dus(dus) # this is a list of tuples
@@ -52,7 +38,6 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 
 	#print "sorted dus: ",dus_sorted
 	#print "sorted agents: ",agents_sorted_by_grant
-	
 
 	#Assign agents to dus.
 	#In this case, we're assigning agents to DUs by looking to the most optimal performance.
@@ -128,16 +113,15 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 				max_power=agents_with_grant[a]
 
 		#print "the most powerfull agent is ", max_agent, agents_with_grant[max_agent]
-		
+
 
 		if (max_agent==""):
 			print ("  failure searching the most powefull agent")
 			return False
 
-		
+
 		#if (int(agents_with_grant[max_agent])<int (dus[max_du]["cost"]+dus[max_du]["size"])):
 		#	return False
-		
 
 		# we assign the most costly DU to the most powerfull agent
 		# ----------------------------------------------------------
@@ -149,15 +133,12 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 		dus[max_du]["cost"]=0
 		dus[max_du]["size"]=0
 		
-
 		try:
 			result[max_du].append(max_agent)
 		except:
 			result[max_du]=[]	
 			result[max_du].append(max_agent)
 		#print(chosen_agent, agents_sorted_by_grant[chosen_agent])
-
-
 
 
 	#TODO: Make this properly, temporal assignation of du_0
@@ -177,9 +158,11 @@ def assign_dus_to_machines(circle_agents, agents_with_grant, dus, agent0,configu
 	return result
 '''
 
+#######################################################################################################
 def timestamp():
 	x=datetime.datetime.now()
 	return x.strftime("%b %d %Y %H:%M:%S |")
+
 
 #######################################################################################################
 '''
@@ -189,9 +172,9 @@ The assignment is done in the following manner:
 	- grant is translated into numerical power value
 	- du_0 is assigned to agent_0
 	- 1st round: DUs are sorted from higher to lower cost and assigned 
-	             to the agents sorted from higher to lower grant
-	             agents power are updated
-	             agent cost is the summation of cost and size
+				to the agents sorted from higher to lower grant
+				agents power are updated
+				agent cost is the summation of cost and size
 	- 2nd round: rest of DUs are assigned to agents acording with their remaining power
 '''
 def assign_dus_to_agents(agents_with_grant, dus, config_dict):
@@ -239,7 +222,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 	# initialization assigning du_0 to agent_0
 	# -----------------------------------------
 	result['du_0'] = ['agent_0']
-		
+
 	
 	#set du0 cost to zero
 	for i in range(0,len(sorted_dus_with_cost)):
@@ -251,10 +234,10 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 			du_0_cost=dus['du_0']['cost']+dus['du_0']['size']
 			dus['du_0']['cost']=0 # update dictionary cost
 			dus['du_0']['size']=0 # update dictionary size
-			
+
 			#sorted_dus_with_cost.pop(i) # pop it because is yet inserted
 			#print("popped du_0");
-	
+
 	#reduce numerical value of grant of agent_0 according with du0 cost
 	print ("DU_0 is assigned always to agent_0")
 	print ("  cost of DU_0 is ",du_0_cost)
@@ -269,7 +252,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 			#print("popped agent_0");
 	print ("agent 0 grant now is :",agents_with_grant['agent_0'])
 	# assign one du to each agent (agents>dus) or one agent to each du (dus>agents)	
-	
+
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	print (" 1st round --- assigning one du to each agent ---")
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
@@ -295,7 +278,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 		sorted_dus_with_cost[i][1]=0 # set cost to zero
 		dus[sorted_dus_with_cost[i][0]]['cost']=0 # update dictionary
 		dus[sorted_dus_with_cost[i][0]]['size']=0 # update dictionary
-		
+
 		agent_index+=1
 
 	print ("1st round result: ")
@@ -350,16 +333,13 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 				max_power=agents_with_grant[a]
 
 		#print "the most powerfull agent is ", max_agent, agents_with_grant[max_agent]
-		
 
 		if (max_agent==""):
 			print ("  failure searching the most powefull agent")
 			return False
 
-		
 		#if (int(agents_with_grant[max_agent])<int (dus[max_du]["cost"]+dus[max_du]["size"])):
 		#	return False
-		
 
 		# we assign the most costly DU to the most powerfull agent
 		# ----------------------------------------------------------
@@ -367,7 +347,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 		du_name=max_du
 		print ("choosen agent:",max_agent,agents_with_grant[max_agent])
 		agent_name= max_agent
-		
+
 		result[du_name]=[]
 		result[du_name].append(agent_name)
 		#result[du_name]=agent_name
@@ -380,11 +360,11 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 	print (agents_with_grant)
 
 	print("\n\nRESULT 2nd round:"); print(result)
-	
+
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
 	print (" 3rd round --- assigning DU_default to all agents")
 	print ("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-	
+
 	if (du_default_present):
 		result['du_default']=[]
 		for i in range(0,len(sorted_agents_with_grant)):
@@ -402,6 +382,7 @@ def assign_dus_to_agents(agents_with_grant, dus, config_dict):
 
 	return result
 
+
 ####################### THIS FUNCTION IS NOT USED #########################################################################
 #Calls to Circle Management Service to obtain the circle info. From there, it takes the FS path.
 def get_circle_info(circle_id, configuration = None):
@@ -410,11 +391,12 @@ def get_circle_info(circle_id, configuration = None):
 	#From this JSON, we are getting the FS path (or URL)
 
 	#url = "address to get the circle"+circle_id
-    #	with urllib.request.urlopen(url) as res:
-    #		data = json.loads(res.read().decode())
-    #		FS = data["CIRCLE_INFO"]["DISTRIBUTED_FS"]
+	#	with urllib.request.urlopen(url) as res:
+	#		data = json.loads(res.read().decode())
+	#		FS = data["CIRCLE_INFO"]["DISTRIBUTED_FS"]
 	#		return FS
 	return		
+
 
 ####################### THIS FUNCTION IS NOT USED #########################################################################
 #deploy: Performs full deployment and assignment of DUs to agents
@@ -423,17 +405,17 @@ def deploy(circle_id, configuration = None):
 	#Calls get_circle_agents(circle_id) in Circle Management Service. It will return the list of agents
 	#I suppose that the circle manager will return a JSON file
 	#Also, we'll need the CIRCLE_INFO.json file to check the FS path
-	
+
 	#url = "address to get the circle"+circle_id
-    #    with urllib.request.urlopen(url) as res:
-    #        data = json.loads(res.read().decode())
-    #        agents_list = list(data.keys())
+	#	with urllib.request.urlopen(url) as res:
+	#		data = json.loads(res.read().decode())
+	#		agents_list = list(data.keys())
 
 	#Remember to load CIRCLE_INFO to get FS path
 
 	#By now, we will work with the fake "cloudbook_agents" list
 	agents_list = list(cloudbook_agents)
-	
+
 	res = assign_dus_to_agents(agents_with_grant, dus)
 
 	json_str = json.dumps(res)
@@ -442,6 +424,7 @@ def deploy(circle_id, configuration = None):
 	fo.close()
 
 	return True
+
 
 ################################################################################################
 #Performs full local deployment and assignment of DUs to agents
@@ -465,7 +448,7 @@ def deploy_local(agents_in_local_circle, path, config_dict):
 	#-----------------------
 	# NOTE: both variables "agents_with_grant and dus are global, not need to be passed"
 	res = assign_dus_to_agents( agents_with_grant, dus, config_dict)
-	
+
 	#write output file in json format
 	#---------------------------------
 	json_str = json.dumps(res)
@@ -475,12 +458,14 @@ def deploy_local(agents_in_local_circle, path, config_dict):
 
 	return True
 
+
 ################################################################################################
 # load dictionary:This function is used for getting the info coming from de config file
 def load_dictionary(filename):
 	with open(filename, 'r') as file:
 		aux = json.load(file)
 	return aux
+
 
 ################################################################################################
 # redeploy: this function achieves the deployment process again, triggered by the 
@@ -499,7 +484,7 @@ def cold_redeploy(input_dir, config_dict):
 
 	p = Path(input_dir+'/COLD_REDEPLOY')
 	p.touch(exist_ok=True)
-	
+
 	global dus
 	dus = loader.load_dictionary(input_dir+"/du_list.json")
 	global agents_with_grant 
@@ -655,6 +640,8 @@ def hot_redeploy(input_dir, new_agents_dict,modified_agents_dict,stopped_agents_
 	p = Path(input_dir+'/HOT_REDEPLOY')
 	p.touch(exist_ok=True)
 	return True
+
+
 ################################################################################################
 #main program to execute by command line
 #=======================================
@@ -696,7 +683,6 @@ print ("=======================================")
 print ( "")
 
 
-
 #mode="local"
 project_folder=""
 surveillance_enabled=False
@@ -730,16 +716,13 @@ if (project_folder==""):
 	print ("option -project_folder missing")
 	sys.exit(0)
 
-
 if (surveillance_interval<5 and surveillance_enabled==True):
 	print ("very low interval value")
 	sys.exit(0)
 
-
 if (not surveillance_enabled and hot_start):
 	print ("option -hot only can be used if suveillance is enabled")
 	sys.exit(0)
-
 
 
 
@@ -839,7 +822,6 @@ if not hot_start:
 	surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
 
 
-
 print ()
 print ()
 print ()
@@ -852,8 +834,6 @@ if surveillance_enabled:
 
 
 while surveillance_enabled:
-
-	
 	#delete posible alarms before sleep
 	critical_file= os.path.isfile(input_dir+"/CRITICAL")
 	if critical_file:
@@ -869,8 +849,7 @@ while surveillance_enabled:
 		except:
 			pass
 
-	
-	
+
 	#sleep
 	print (timestamp(),"sleeping...", surveillance_interval	)
 	print()
@@ -882,7 +861,6 @@ while surveillance_enabled:
 	print ("============== SURVEILLANCE MONITOR ===============================")
 	print (timestamp(), "End of sleep. Now ready for surveillance")
 
-	
 	#delete REDEPLOY file if exists
 	redeploy_file= os.path.isfile(input_dir+"/COLD_REDEPLOY")
 	if redeploy_file:
@@ -897,8 +875,6 @@ while surveillance_enabled:
 			os.remove(input_dir+"/HOT_REDEPLOY")
 		except:
 			pass
-	
-
 
 
 	#create new updated file agents_grant
@@ -907,7 +883,7 @@ while surveillance_enabled:
 	if idle_agents != []:
 		print (" detected some new or existing idle agents (only loaded with du_default):", idle_agents)
 
-    
+
 	# check if there is a CRITICAL alarm. If exists, a cold redeployment must be done
 	# -------------------------------------------------------------------------------
 	# critical must be checked before warning
@@ -924,7 +900,7 @@ while surveillance_enabled:
 		print (timestamp(), "Detected CRITICAL ALARM: proceed with COLD redeployment")
 		cold_redeploy(input_dir,config_dict)
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
-	
+
 		continue
 
 	# check if there is a WARNING alarm. If exists, a hot redeployment may be done
@@ -941,7 +917,7 @@ while surveillance_enabled:
 		if not redeploy :
 			print(" PROBLEM: Hot redeployment imposible because one or more orphan DUs are critical")
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
-	
+
 		continue
 
 	#check if there are changes in agents. If there are new agents, a hot redeployment may be done
@@ -951,13 +927,12 @@ while surveillance_enabled:
 	sa={} # stopped agents
 	changes = surveillance_monitor.check_agents_changes(input_dir,na,ma,sa)
 
-	
 	if changes!=0:
 		print (timestamp(), "Detected CHANGES ON AGENTS: proceed with HOT redeployment")
 		redeploy=hot_redeploy(input_dir,na,ma,sa, idle_agents,config_dict)
 		if not redeploy :
 			print(" PROBLEM: Hot redeployment imposible because one or more orphan DUs are critical")
 		surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
-	
+
 		continue
 
