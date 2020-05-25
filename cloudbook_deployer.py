@@ -764,6 +764,9 @@ if (surveillance_interval==0):
 # --------------------------------------------------------
 surveillance_monitor.clean_touch_files(input_dir)
 
+
+
+
 # wait till agents create their agent_xx_grant
 # --------------------------------------------
 if (not fast_start):
@@ -773,7 +776,8 @@ if (not fast_start):
 	print()
 	surveillance_monitor.sleeprint(float(surveillance_interval))
 	#time.sleep (float(surveillance_interval)) # this wait is supposed to be enough. 
-	
+
+
 
 # number of available agents is the number of files
 # -------------------------------------------------
@@ -820,6 +824,13 @@ if not hot_start:
 	# make a backup of initial cloudbook and initial agents_grant
 	surveillance_monitor.backup_file(input_dir, "/cloudbook.json", "/previous_cloudbook.json")
 	surveillance_monitor.backup_file(input_dir, "/agents_grant.json", "/previous_agents_grant.json")
+	# create cold redeploy touch file
+	#-----------------------------------
+	p = Path(input_dir+'/COLD_REDEPLOY')
+	p.touch(exist_ok=True)
+	surveillance_monitor.sleeprint(float(surveillance_interval))
+	surveillance_monitor.clean_touch_files(input_dir)
+
 
 
 print ()
