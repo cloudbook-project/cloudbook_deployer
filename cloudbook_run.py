@@ -14,7 +14,7 @@ import sys
 import platform
 from pathlib import Path
 import requests
-
+import surveillance_monitor
 
 
 #####   MAIN   #####
@@ -43,6 +43,7 @@ if __name__ == "__main__":
 	agents_grant_path = project_path + os.sep + "distributed" + os.sep + "agents_grant.json"
 	running_path = project_path + os.sep + "distributed" + os.sep + "RUNNING"
 	cloudbookjson_path = project_path + os.sep + "distributed" + os.sep + "cloudbook.json"
+	input_dir=project_path + os.sep + "distributed"
 
 	# Load agent_0 ip and port
 	agent0_ip_port = ""
@@ -53,6 +54,10 @@ if __name__ == "__main__":
 	except:
 		print("\nERROR: IP or port for agent_0 is unknown, and execution could not start. See agents_grant.json\n")
 		os._exit(1)
+
+
+	#delete alarms
+	surveillance_monitor.clean_touch_files(input_dir)
 
 	# Create RUNNING file
 	Path(running_path).touch(exist_ok=True)

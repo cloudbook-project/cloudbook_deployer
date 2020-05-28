@@ -774,6 +774,16 @@ if (not fast_start):
 	print ("waiting creation of agent_XX_grant files...")
 	print (timestamp(),"sleeping...", surveillance_interval	)
 	print()
+	
+	#delete current cloudbook.json (if exists) NEW 28-05-2020
+	#--------------------------------------------------------
+	cloudbook_file= os.path.isfile(input_dir+"/cloudbook.json")
+	if cloudbook_file:
+		try:
+			os.remove(input_dir+"/cloudbook.json")
+		except:
+			pass
+
 	surveillance_monitor.sleeprint(float(surveillance_interval))
 	#time.sleep (float(surveillance_interval)) # this wait is supposed to be enough. 
 
