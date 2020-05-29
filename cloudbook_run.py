@@ -80,8 +80,8 @@ if __name__ == "__main__":
 	# Remove RUNNING and cloudbook.json files (user program has ended)
 	if os.path.exists(running_path):
 		os.remove(running_path)
-	if os.path.exists(cloudbookjson_path):
-		os.remove(cloudbookjson_path)
+	#if os.path.exists(cloudbookjson_path):
+	#	os.remove(cloudbookjson_path)
 
 	# Print the result returned by main() function in the user program
 	try:
