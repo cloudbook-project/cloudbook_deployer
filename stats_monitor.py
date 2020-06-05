@@ -174,7 +174,7 @@ def get_stats(input_dir, delete_stats_files):
 						continue
 
 					# Looking for: "critical_section_control"
-					elif invoked_fun=="critical_section_control":
+					elif invoker_fun=="critical_section_control":
 						continue
 
 					# Looking for: "nonblocking_inv_FUNCNAME"
