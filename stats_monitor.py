@@ -67,7 +67,7 @@ def compare_matrix(old_matrix,matrix):
 			ratio_old =(suma_old)//(1+old_matrix[row][col])
 			print("ratios:", ratio_old,ratio_new)
 			ratio=ratio_new//ratio_old
-			if ratio>10:
+			if ratio>1:
 				return True
 	return False
 
