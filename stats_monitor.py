@@ -356,7 +356,13 @@ while  True:
 
 	# compare old stats with new stats
 	recomendation=compare_matrix(old_matrix,matrix)
-	print("RECOMENDATION REMAKE:", recomendation)
+	print ("---------------------------------------")
+	print("        RECOMENDATION REMAKE:", recomendation)
+	print ("---------------------------------------")
+	if recomendation:
+		print ("stop the stats monitor before launch remake")
+		print ("after remake you can launch stats monitor again") 
+	#	sys.exit(0)
 
 	# make a recomendation (REQUEST_REMAKE file) based on the comparison achieved
 
